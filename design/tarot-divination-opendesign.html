@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><script type="application/json" data-od-external-dependencies>["https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;600&family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap"]</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>午夜天文台 · 塔罗占卜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;600&family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+/* ════════════════════════════════════════════════════════════════
+   Design tokens — 午夜天文台 · 塔罗占卜
+   主色：深夜蓝紫  强调：月光金  辅助：星芒白  逆位警示：暗锈红
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  /* ── color 色板 ── */
+  --color-bg-0:      #0d0820;   /* 最深的夜空 */
+  --color-bg-1:      #1a1033;   /* 夜 1 */
+  --color-bg-2:      #231a4d;   /* 夜 2 */
+  --color-bg-3:      #2e215f;   /* 夜 3 · 星云 */
+  --color-surface:   rgba(58, 42, 110, 0.42);
+  --color-surface-strong: rgba(255, 255, 255, 0.07);
+  --color-glass:     rgba(255, 255, 255, 0.045);
+  --color-fg:        #f4eef8;   /* 星芒白 */
+  --color-muted:     rgba(244, 238, 248, 0.64);
+  --color-faint:     rgba(244, 238, 248, 0.36);
+  --color-border:    rgba(232, 201, 122, 0.22);
+  --color-border-strong: rgba(232, 201, 122, 0.48);
+  --color-gold:      #d4af37;   /* 月光金 */
+  --color-gold-light:#e8c97a;
+  --color-gold-bright:#f2d78f;
+  --color-gold-deep: #a9862a;
+  --color-on-gold:   #24174a;   /* 金底上的文字 */
+  --color-gold-soft: rgba(212, 175, 55, 0.12);
+  --color-gold-glow: rgba(212, 175, 55, 0.30);
+  --color-rust:      #8a3b3b;   /* 逆位警示色 */
+  --color-rust-light:#d79a9a;
+  --color-rust-soft: rgba(138, 59, 59, 0.18);
+  --color-card-1:    #32245f;   /* 牌面渐变上 */
+  --color-card-2:    #241847;
+  --color-card-3:    #191031;
+  --color-back-1:    #2c1e5c;   /* 牌背渐变上 */
+  --color-back-2:    #171030;
+
+  /* ── font 字体 ── */
+  --font-display: 'Playfair Display', 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+  --font-body:    'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* ── space 间距阶梯（8pt 基准）── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* ── radius 圆角 ── */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-pill: 999px;
+
+  /* ── shadow 阴影 ── */
+  --shadow-card:   0 24px 60px rgba(5, 2, 18, 0.55);
+  --shadow-glow:   0 0 46px rgba(212, 175, 55, 0.28);
+  --shadow-halo:   0 18px 54px rgba(212, 175, 55, 0.22);
+  --shadow-focus:  0 0 0 3px rgba(212, 175, 55, 0.20);
+
+  /* ── dur 动效时长 ── */
+  --dur-fast:  0.3s;
+  --dur-med:   0.6s;
+  --dur-slow:  1.2s;
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout:  cubic-bezier(0.65, 0.05, 0.36, 1);
+
+  /* ── type scale ── */
+  --fs-h1: clamp(40px, 6vw, 72px);
+  --fs-h2: clamp(30px, 4vw, 48px);
+  --fs-lead: 17px;
+  --fs-body: 16px;
+}
+
+/* ─── reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: radial-gradient(120% 90% at 50% -10%, var(--color-bg-3) 0%, var(--color-bg-2) 32%, var(--color-bg-1) 62%, var(--color-bg-0) 100%);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 300;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+p, h1, h2, h3, h4 { margin: 0; text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
+::selection { background: var(--color-gold); color: var(--color-on-gold); }
+:focus-visible { outline: 2px solid var(--color-gold-light); outline-offset: 3px; }
+
+/* ─── 星空背景 ─────────────────────────────────────────────────── */
+.sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.sky__nebula { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; }
+.sky__nebula--a { width: 560px; height: 420px; left: -160px; top: -120px; background: radial-gradient(50% 50% at 50% 50%, rgba(46, 33, 95, 0.85), transparent 72%); }
+.sky__nebula--b { width: 620px; height: 460px; right: -220px; bottom: -180px; background: radial-gradient(50% 50% at 50% 50%, rgba(35, 26, 77, 0.9), transparent 70%); }
+.sky__nebula--c { width: 340px; height: 260px; right: 12%; top: 22%; background: radial-gradient(50% 50% at 50% 50%, rgba(122, 92, 168, 0.28), transparent 70%); animation: nebulaDrift 26s var(--ease-out) infinite alternate; }
+@keyframes nebulaDrift { from { transform: translate(0, 0) scale(1); } to { transform: translate(-30px, 22px) scale(1.08); } }
+#stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.constellation { position: absolute; left: 6vw; top: 120px; width: 200px; opacity: 0.5; animation: constelPulse 7s ease-in-out infinite; }
+@keyframes constelPulse { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.6; } }
+.constellation .cn-line { stroke: var(--color-gold-light); stroke-width: 0.8; stroke-opacity: 0.4; }
+.constellation .cn-dot { fill: var(--color-gold-light); opacity: 0.8; }
+
+.moon { position: absolute; right: 7vw; top: 104px; width: 116px; animation: moonFloat 9s ease-in-out infinite; }
+@keyframes moonFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.star-trails { position: absolute; left: -190px; bottom: -250px; width: 600px; height: 600px; opacity: 0.8; animation: trailSpin 120s linear infinite; }
+@keyframes trailSpin { to { transform: rotate(360deg); } }
+
+.dust { position: absolute; inset: 0; }
+.dust i {
+  position: absolute; bottom: -12px;
+  width: var(--d, 5px); height: var(--d, 5px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 201, 122, 0.9), rgba(232, 201, 122, 0));
+  filter: blur(0.5px);
+  opacity: 0;
+  animation: dustRise var(--t, 14s) linear infinite;
+  animation-delay: var(--dl, 0s);
+}
+@keyframes dustRise {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  8%   { opacity: var(--o, 0.5); }
+  60%  { transform: translate(var(--x, 18px), -46vh); opacity: var(--o, 0.5); }
+  100% { transform: translate(calc(var(--x, 18px) * -1), -92vh); opacity: 0; }
+}
+.vignette { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(5, 2, 14, 0.55) 100%); }
+
+/* ─── 顶部栏 ───────────────────────────────────────────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: color-mix(in oklch, var(--color-bg-1) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(232, 201, 122, 0.12);
+}
+.topbar__inner { max-width: 1180px; margin-inline: auto; padding: 12px var(--space-6); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand__mark { width: 30px; height: 30px; color: var(--color-gold-light); }
+.brand__text { font-family: var(--font-display); font-size: 18px; font-weight: 600; letter-spacing: 0.04em; }
+.brand__text em { font-style: normal; font-size: 11px; letter-spacing: 0.42em; color: var(--color-faint); margin-left: 6px; }
+
+.steps { display: flex; gap: var(--space-5); margin: 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: 0.08em; color: var(--color-faint); transition: color var(--dur-fast); }
+.steps .steps__idx { font-family: var(--font-display); font-size: 12px; color: inherit; opacity: 0.75; }
+.steps li.is-active { color: var(--color-gold-light); }
+.steps li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.55; }
+.steps li:first-child::before { display: none; }
+
+.btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 26px; border-radius: var(--radius-pill); border: 1px solid transparent; font-family: var(--font-body); font-size: 15px; font-weight: 400; letter-spacing: 0.05em; transition: transform 0.15s ease, background var(--dur-med) var(--ease-out), border-color var(--dur-med), box-shadow var(--dur-med), color var(--dur-fast), opacity var(--dur-fast); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { cursor: not-allowed; }
+
+.btn--primary { background: linear-gradient(180deg, var(--color-gold-light) 0%, var(--color-gold) 100%); color: var(--color-on-gold); box-shadow: 0 10px 34px var(--color-gold-glow); }
+.btn--primary:hover:not(:disabled) { background: linear-gradient(180deg, var(--color-gold-bright) 0%, var(--color-gold-light) 100%); box-shadow: 0 16px 46px rgba(212, 175, 55, 0.42); transform: translateY(-1px); }
+.btn--primary:disabled { background: var(--color-surface-strong); color: var(--color-faint); box-shadow: none; }
+
+.btn--ghost { background: transparent; color: var(--color-muted); border-color: var(--color-border); }
+.btn--ghost:hover:not(:disabled) { color: var(--color-fg); border-color: var(--color-border-strong); background: var(--color-surface-strong); }
+
+.btn--restart { min-height: 40px; padding: 0 18px; font-size: 13px; opacity: 0; pointer-events: none; transform: translateY(-4px); transition: opacity var(--dur-med), transform var(--dur-med), background var(--dur-med), border-color var(--dur-med), color var(--dur-fast); }
+.btn--restart.is-visible { opacity: 1; pointer-events: auto; transform: none; }
+.btn--restart svg { width: 15px; height: 15px; }
+
+/* ─── 主舞台 ───────────────────────────────────────────────────── */
+#app { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 96px var(--space-5) 56px; }
+.view { display: none; width: 100%; }
+.view.is-active { display: block; animation: viewIn 0.7s var(--ease-out) both; }
+@keyframes viewIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+.eyebrow { font-size: 12px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--color-gold); text-align: center; margin-bottom: var(--space-5); }
+.eyebrow::before, .eyebrow::after { content: '—'; margin: 0 0.8em; color: var(--color-gold); opacity: 0.4; }
+
+/* ─── 提问页 ───────────────────────────────────────────────────── */
+.ask { max-width: 640px; margin-inline: auto; text-align: center; }
+.ask__title { font-family: var(--font-display); font-size: var(--fs-h1); font-weight: 500; line-height: 1.12; letter-spacing: 0.01em; margin-bottom: var(--space-5); }
+.ask__title .hl { color: var(--color-gold-light); }
+.ask__lead { max-width: 44ch; margin: 0 auto var(--space-8); color: var(--color-muted); font-size: var(--fs-lead); line-height: 1.8; }
+
+.ask__form { max-width: 560px; margin-inline: auto; display: flex; flex-direction: column; gap: var(--space-6); text-align: left; }
+.field__label { display: block; font-size: 12px; letter-spacing: 0.18em; color: var(--color-muted); margin-bottom: var(--space-2); }
+.input { width: 100%; height: 56px; padding: 0 20px; border-radius: var(--radius-pill); background: var(--color-glass); border: 1px solid var(--color-border); color: var(--color-fg); font: inherit; font-size: 16px; font-weight: 300; transition: border-color var(--dur-fast), box-shadow var(--dur-fast), background var(--dur-fast); }
+.input::placeholder { color: var(--color-faint); }
+.input:focus { outline: none; border-color: var(--color-gold); background: var(--color-surface-strong); box-shadow: var(--shadow-focus); }
+
+.spread-pick { border: 0; padding: 0; margin: 0; }
+.spread-pick__legend { display: block; font-size: 12px; letter-spacing: 0.18em; color: var(--color-muted); margin-bottom: var(--space-4); }
+.spread-pick__options { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.spread-opt { display: flex; align-items: center; gap: var(--space-4); padding: 15px 18px; border-radius: var(--radius-lg); background: var(--color-glass); border: 1px solid var(--color-border); color: var(--color-fg); text-align: left; cursor: pointer; transition: border-color var(--dur-fast), background var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast); }
+.spread-opt:hover { border-color: var(--color-border-strong); background: var(--color-surface-strong); transform: translateY(-1px); }
+.spread-opt.is-selected { border-color: var(--color-gold); background: linear-gradient(180deg, var(--color-gold-soft), rgba(212, 175, 55, 0.05)); box-shadow: 0 0 0 1px var(--color-gold), 0 10px 34px rgba(212, 175, 55, 0.16); }
+.spread-opt__ico { flex: none; width: 38px; height: 38px; color: var(--color-gold); opacity: 0.9; }
+.spread-opt__title { display: block; font-family: var(--font-display); font-size: 18px; letter-spacing: 0.02em; }
+.spread-opt__sub { display: block; margin-top: 2px; font-size: 12px; letter-spacing: 0.05em; color: var(--color-faint); }
+.spread-opt.is-selected .spread-opt__sub { color: var(--color-gold-light); }
+
+.btn--start { align-self: center; min-width: 240px; }
+.field__error { display: none; margin: 10px 0 0; text-align: center; font-size: 13px; letter-spacing: 0.06em; color: var(--color-rust-light); }
+.field__error.is-visible { display: block; animation: fadeIn 0.4s var(--ease-out) both; }
+.input.is-error { border-color: var(--color-rust); box-shadow: 0 0 0 3px var(--color-rust-soft); animation: shake 0.45s var(--ease-out); }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+
+/* ─── 抽牌页 ───────────────────────────────────────────────────── */
+.draw { max-width: 820px; margin-inline: auto; text-align: center; }
+.draw__title { font-family: var(--font-display); font-size: var(--fs-h2); font-weight: 500; letter-spacing: 0.01em; }
+.draw__hint { min-height: 26px; margin-top: var(--space-4); font-size: 15px; letter-spacing: 0.08em; color: var(--color-gold-light); opacity: 0; transition: opacity var(--dur-med); }
+.draw__hint.is-visible { opacity: 1; }
+
+.draw__stage { position: relative; min-height: 460px; display: grid; place-items: center; margin-top: var(--space-6); }
+.table { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); width: min(720px, 94vw); height: 150px; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(212, 175, 55, 0.13), transparent 70%); filter: blur(6px); }
+
+/* 洗牌 */
+.shuffle { position: relative; width: 240px; height: 330px; }
+.shuffle__card { position: absolute; left: 50%; top: 50%; width: 146px; height: 251px; margin: -125px 0 0 -73px; border-radius: var(--radius-lg); box-shadow: var(--shadow-card); transform: translateX(calc(var(--i) * 5px - 15px)) translateY(calc(var(--i) * 3px)) rotate(calc(var(--i) * 2.2deg)); }
+.shuffle__jitter { width: 100%; height: 100%; animation: shuffleJitter 1.5s ease-in-out infinite; animation-delay: calc(var(--i) * -0.19s); }
+@keyframes shuffleJitter {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-13px) rotate(-1.4deg); }
+  32% { transform: translateX(11px) rotate(1.4deg); }
+  48% { transform: translateX(-8px) rotate(-0.9deg); }
+  66% { transform: translateX(9px) rotate(0.9deg); }
+  82% { transform: translateX(-4px); }
+}
+.shuffle__label { position: absolute; left: 0; right: 0; bottom: -34px; text-align: center; font-size: 13px; letter-spacing: 0.22em; color: var(--color-faint); }
+
+/* 扇形牌阵 */
+.spread { position: relative; display: flex; justify-content: center; align-items: flex-start; perspective: 1600px; }
+.slot { --card-w: clamp(168px, 24vw, 224px); display: flex; flex-direction: column; align-items: center; }
+.slot__deal { position: relative; perspective: 1200px; }
+.spread--three .slot { --card-w: clamp(122px, 15.5vw, 172px); }
+.slot { transform-origin: 50% 92%; }
+.slot--l { transform: rotate(-10deg) translateY(26px); margin-right: -54px; z-index: 1; }
+.slot--c { z-index: 3; }
+.slot--r { transform: rotate(10deg) translateY(26px); margin-left: -54px; z-index: 1; }
+.slot--single { transform: rotate(-2deg); }
+.slot .halo { position: absolute; left: 50%; top: 44%; width: 320px; height: 320px; margin: -160px 0 0 -160px; border-radius: 50%; background: radial-gradient(circle, rgba(232, 201, 122, 0.55), rgba(232, 201, 122, 0) 62%); opacity: 0; pointer-events: none; }
+.slot.is-revealed .halo { animation: haloBurst 1.3s var(--ease-out) both; }
+@keyframes haloBurst { 0% { opacity: 0; transform: scale(0.42); } 28% { opacity: 0.95; } 100% { opacity: 0; transform: scale(1.55); } }
+
+.slot__label { margin-top: 16px; font-size: 12px; letter-spacing: 0.16em; color: var(--color-faint); transition: color var(--dur-fast), text-shadow var(--dur-fast); }
+.slot.is-next .slot__label { color: var(--color-gold-light); text-shadow: 0 0 14px rgba(212, 175, 55, 0.5); }
+.slot.is-done .slot__label { color: var(--color-faint); }
+
+/* ─── 卡牌 ─────────────────────────────────────────────────────── */
+.card { position: relative; width: var(--card-w); aspect-ratio: 5 / 8.6; border: 0; padding: 0; background: none; color: inherit; border-radius: var(--radius-lg); transform-style: preserve-3d; transition: transform var(--dur-slow) var(--ease-inout), box-shadow var(--dur-med) var(--ease-out); }
+.card:focus-visible { outline: none; box-shadow: var(--shadow-focus), var(--shadow-card); }
+.card__face { position: absolute; inset: 0; border-radius: inherit; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; box-shadow: var(--shadow-card); }
+.card__face--back { transform: rotateY(0deg); background: linear-gradient(158deg, var(--color-back-1) 0%, var(--color-card-2) 52%, var(--color-back-2) 100%); }
+.card__face--front { transform: rotateY(180deg); background: linear-gradient(164deg, var(--color-card-1) 0%, var(--color-card-2) 46%, var(--color-card-3) 100%); }
+.card-back { position: absolute; inset: 0; border-radius: var(--radius-lg); background: linear-gradient(158deg, var(--color-back-1) 0%, var(--color-card-2) 52%, var(--color-back-2) 100%); overflow: hidden; }
+.card.is-flipped { transform: rotateY(180deg); }
+.card.is-reversed .card__inner { transform: rotate(180deg); }
+
+.slot .card:not(.is-flipped) { transition: transform var(--dur-med) var(--ease-out), box-shadow var(--dur-med) var(--ease-out), filter var(--dur-fast); }
+.slot .card:not(.is-flipped):hover { transform: translateY(-14px); box-shadow: var(--shadow-halo); }
+.slot:not(.is-next) .card:not(.is-flipped) { filter: brightness(0.66); }
+.slot.is-next .card:not(.is-flipped) { cursor: pointer; }
+.slot.is-next .card:not(.is-flipped)::after { content: ''; position: absolute; inset: -3px; border-radius: calc(var(--radius-lg) + 3px); border: 1px solid var(--color-gold); opacity: 0.55; pointer-events: none; animation: nextPulse 2.2s ease-in-out infinite; }
+@keyframes nextPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.75; } }
+
+/* 牌背纹章 */
+.back-emo { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* 牌面 */
+.card__inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform var(--dur-slow) var(--ease-inout); }
+.card__frame { position: absolute; inset: 9px; border: 1px solid rgba(232, 201, 122, 0.55); border-radius: calc(var(--radius-lg) - 3px); }
+.card__frame::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(232, 201, 122, 0.2); border-radius: calc(var(--radius-lg) - 6px); }
+.card__head { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-start; }
+.card__symbol { width: calc(var(--card-w) * 0.15); height: calc(var(--card-w) * 0.15); color: var(--color-gold); opacity: 0.85; }
+.card__symbol svg { width: 100%; height: 100%; }
+.card__star { font-size: calc(var(--card-w) * 0.1); color: var(--color-gold); opacity: 0.8; line-height: 1; }
+.card__numeral { margin-top: calc(var(--card-w) * 0.18); font-family: var(--font-display); font-size: calc(var(--card-w) * 0.42); font-weight: 500; line-height: 1; background: linear-gradient(180deg, var(--color-gold-light) 10%, var(--color-gold) 78%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.card__divider { display: flex; align-items: center; gap: 6px; margin: calc(var(--card-w) * 0.09) 0; width: 46%; }
+.card__divider::before, .card__divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(232, 201, 122, 0.55), transparent); }
+.card__divider i { width: 5px; height: 5px; transform: rotate(45deg); border: 1px solid var(--color-gold); opacity: 0.8; }
+.card__name { font-family: var(--font-display); font-size: clamp(15px, calc(var(--card-w) * 0.128), 23px); font-weight: 600; letter-spacing: 0.14em; color: var(--color-fg); text-indent: 0.14em; }
+.card__en { margin-top: calc(var(--card-w) * 0.035); font-size: clamp(7px, calc(var(--card-w) * 0.058), 11px); letter-spacing: 0.24em; color: var(--color-faint); text-transform: uppercase; }
+.card__rev-mark { display: block; margin-top: calc(var(--card-w) * 0.055); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--color-rust-light); opacity: 0; filter: drop-shadow(0 0 6px rgba(176, 80, 80, 0.65)); transition: opacity var(--dur-med); }
+.card.is-reversed .card__rev-mark { opacity: 1; }
+
+/* ─── 解读页 ───────────────────────────────────────────────────── */
+.reading { max-width: 720px; margin-inline: auto; text-align: center; }
+.reading__question { margin: 0 auto var(--space-6); max-width: 34ch; font-family: var(--font-display); font-size: clamp(17px, 2vw, 21px); letter-spacing: 0.06em; color: var(--color-muted); animation: riseIn 0.9s var(--ease-out) both; }
+.reading__title { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 46px); font-weight: 500; letter-spacing: 0.05em; color: var(--color-gold-light); margin-bottom: var(--space-7); animation: riseIn 0.9s var(--ease-out) both; }
+
+.reading__cards { display: flex; justify-content: center; gap: var(--space-5); flex-wrap: wrap; margin-bottom: var(--space-8); }
+.reading-card { margin: 0; width: clamp(132px, 20vw, 188px); }
+.reading-card__deal { animation: riseIn 0.9s var(--ease-out) backwards; }
+.reading-card .card { --card-w: clamp(118px, 13vw, 154px); pointer-events: none; margin-inline: auto; }
+.reading-card figcaption { margin-top: var(--space-4); animation: fadeIn 1s var(--ease-out) backwards; }
+.reading-card__pos { display: block; font-size: 12px; letter-spacing: 0.2em; color: var(--color-gold-light); margin-bottom: 8px; }
+.reading-card__key { display: inline-block; margin-top: 8px; font-family: var(--font-display); font-size: 18px; letter-spacing: 0.1em; color: var(--color-fg); }
+.reading-card__text { margin-top: 8px; font-size: 13.5px; line-height: 1.75; color: var(--color-muted); text-align: left; }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 11px; letter-spacing: 0.08em; border: 1px solid; }
+.chip--up { color: var(--color-gold-light); border-color: rgba(232, 201, 122, 0.35); background: rgba(232, 201, 122, 0.08); }
+.chip--rev { color: var(--color-rust-light); border-color: rgba(176, 80, 80, 0.42); background: var(--color-rust-soft); }
+
+.reading__block { text-align: left; padding: var(--space-7) var(--space-6); border-radius: var(--radius-xl); background: linear-gradient(180deg, rgba(46, 33, 95, 0.34), rgba(26, 16, 51, 0.5)); border: 1px solid rgba(232, 201, 122, 0.16); box-shadow: var(--shadow-card); }
+.reading__block-title { font-family: var(--font-display); font-size: 26px; font-weight: 500; letter-spacing: 0.16em; text-align: center; color: var(--color-gold-light); margin-bottom: var(--space-6); }
+.reading__block > * { animation: riseIn 0.9s var(--ease-out) both; }
+.reading__points { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-5); }
+.reading__points li { position: relative; padding-left: 28px; font-size: 15.5px; line-height: 1.8; color: var(--color-fg); }
+.reading__points li::before { content: ''; position: absolute; left: 3px; top: 0.62em; width: 8px; height: 8px; transform: rotate(45deg); border: 1px solid var(--color-gold); opacity: 0.7; }
+.reading__points strong { font-weight: 500; color: var(--color-gold-light); }
+.reading__summary { margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px dashed rgba(232, 201, 122, 0.24); font-size: 15.5px; line-height: 1.9; color: var(--color-muted); }
+.reading__sig { margin-top: var(--space-5); text-align: right; font-family: var(--font-display); font-size: 15px; letter-spacing: 0.16em; color: var(--color-faint); }
+
+@keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── 响应式 ───────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .steps { display: none; }
+  .spread-pick__options { grid-template-columns: 1fr; }
+  #app { padding-top: 84px; }
+  .constellation { left: -40px; }
+  .moon { right: -20px; top: 120px; opacity: 0.85; }
+  .reading__block { padding: var(--space-6) var(--space-5); }
+}
+@media (max-width: 480px) {
+  .ask__title { font-size: 38px; }
+  .brand__text em { display: none; }
+  .spread--three .slot { --card-w: 118px; }
+  .slot--l { margin-right: -38px; }
+  .slot--r { margin-left: -38px; }
+}
+
+/* ─── 动效偏好：尊重减弱动效 ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0.001s !important; }
+  .card { transform-style: flat; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ 星空背景 ═══ -->
+<div class="sky" aria-hidden="true">
+  <div class="sky__nebula sky__nebula--a"></div>
+  <div class="sky__nebula sky__nebula--b"></div>
+  <div class="sky__nebula sky__nebula--c"></div>
+  <canvas id="stars"></canvas>
+  <svg class="constellation" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+    <g>
+      <path class="cn-line" d="M10 62 L32 26 L56 60 L80 20 L104 56"/>
+      <path class="cn-line" d="M32 26 L80 20" stroke-opacity="0.16"/>
+      <path class="cn-line" d="M56 60 L104 56" stroke-opacity="0.16"/>
+    </g>
+    <g class="cn-dot">
+      <circle cx="10" cy="62" r="1.6"/><circle cx="32" cy="26" r="2"/><circle cx="56" cy="60" r="1.6"/>
+      <circle cx="80" cy="20" r="2"/><circle cx="104" cy="56" r="1.6"/>
+    </g>
+  </svg>
+  <svg class="moon" viewBox="0 0 120 120" aria-hidden="true">
+    <defs>
+      <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(232,201,122,0.5)"/>
+        <stop offset="100%" stop-color="rgba(232,201,122,0)"/>
+      </radialGradient>
+      <clipPath id="moonCut"><circle cx="76" cy="42" r="34"/></clipPath>
+    </defs>
+    <circle cx="60" cy="60" r="64" fill="url(#moonGlow)"/>
+    <circle cx="50" cy="58" r="27" fill="var(--color-gold-light)" clip-path="url(#moonCut)" opacity="0.96"/>
+  </svg>
+  <svg class="star-trails" viewBox="0 0 800 800" fill="none" aria-hidden="true">
+    <g stroke="var(--color-gold)" stroke-opacity="0.18" stroke-width="1">
+      <circle cx="400" cy="400" r="150" stroke-dasharray="2 10"/>
+      <circle cx="400" cy="400" r="205" stroke-dasharray="1 14"/>
+      <circle cx="400" cy="400" r="262" stroke-dasharray="3 16"/>
+      <circle cx="400" cy="400" r="330" stroke-dasharray="1 20"/>
+    </g>
+    <g stroke="var(--color-gold)" stroke-opacity="0.1" stroke-width="1" transform="rotate(30 400 400)">
+      <circle cx="400" cy="400" r="178" stroke-dasharray="2 12"/>
+      <circle cx="400" cy="400" r="240" stroke-dasharray="1 16"/>
+    </g>
+  </svg>
+  <div class="dust" id="dust"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- ═══ 顶部栏 ═══ -->
+<header class="topbar" data-od-id="topnav">
+  <div class="topbar__inner">
+    <div class="brand" data-od-id="brand">
+      <svg class="brand__mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M22 5a11 11 0 1 0 5 19 8.5 8.5 0 0 1-5-19z" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M21 9l1 2.2 2.4.4-1.7 1.7.4 2.4-2.1-1.2-2.1 1.2.4-2.4-1.7-1.7 2.4-.4z" fill="currentColor"/>
+      </svg>
+      <span class="brand__text">午夜天文台<em>TAROT</em></span>
+    </div>
+    <ol class="steps" aria-label="占卜流程">
+      <li class="is-active" data-step="ask"><span class="steps__idx">壹</span>提问</li>
+      <li data-step="draw"><span class="steps__idx">贰</span>抽牌</li>
+      <li data-step="reading"><span class="steps__idx">叁</span>解读</li>
+    </ol>
+    <button type="button" class="btn btn--ghost btn--restart" id="restart-btn" data-od-id="restart-btn" aria-label="重新占卜">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg>
+      重新占卜
+    </button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- 壹 · 提问页 -->
+  <section class="view is-active" id="view-ask" data-od-id="view-ask">
+    <div class="ask">
+      <p class="eyebrow">午夜天文台 · Tarot Divination</p>
+      <h1 class="ask__title">将你的问题，<br /><span class="hl">交给星辰</span></h1>
+      <p class="ask__lead">凝神片刻，在心中默念你的问题。让一张牌，替你回应那些尚未成形的念头。</p>
+      <div class="ask__form" id="ask-form" data-od-id="ask-form">
+        <div>
+          <label class="field__label" for="question">你的问题</label>
+          <input class="input" id="question" name="question" type="text" maxlength="48" placeholder="例如：这段关系的走向？" autocomplete="off" data-od-id="question-input" />
+          <p class="field__error" id="field-error" role="alert">请先写下你的问题（至少 2 个字），再开始占卜。</p>
+        </div>
+        <fieldset class="spread-pick" data-od-id="spread-pick">
+          <legend class="spread-pick__legend">选择牌阵</legend>
+          <div class="spread-pick__options">
+            <button type="button" class="spread-opt is-selected" data-spread="1" data-od-id="spread-opt-single">
+              <svg class="spread-opt__ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+                <rect x="13" y="7" width="16" height="26" rx="2.5"/>
+                <path d="M17 13h8M17 17h8M17 25h5" stroke-opacity="0.75"/>
+                <path d="M20 5l1.2 2 2 .3-1.4 1.5.3 2-2.1-1.1-2.1 1.1.3-2-1.4-1.5 2-.3z" fill="currentColor" stroke="none" opacity="0.9"/>
+              </svg>
+              <span>
+                <span class="spread-opt__title">单张牌</span>
+                <span class="spread-opt__sub">今日指引 · 一日一签</span>
+              </span>
+            </button>
+            <button type="button" class="spread-opt" data-spread="3" data-od-id="spread-opt-three">
+              <svg class="spread-opt__ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+                <g transform="rotate(-8 16 20)"><rect x="8" y="7" width="15" height="25" rx="2.5"/><path d="M12 13h7M12 17h7" stroke-opacity="0.75"/></g>
+                <g transform="rotate(8 24 20)"><rect x="17" y="7" width="15" height="25" rx="2.5"/><path d="M21 13h7M21 17h7" stroke-opacity="0.75"/></g>
+                <path d="M20 4.5l1.1 1.9 2.1.3-1.5 1.6.3 2.1-2-1-2 1 .3-2.1-1.5-1.6 2.1-.3z" fill="currentColor" stroke="none" opacity="0.9"/>
+              </svg>
+              <span>
+                <span class="spread-opt__title">三张牌</span>
+                <span class="spread-opt__sub">过去 · 现在 · 未来</span>
+              </span>
+            </button>
+          </div>
+        </fieldset>
+        <button type="button" class="btn btn--primary btn--start" id="start-btn" data-od-id="start-btn">开始占卜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 贰 · 抽牌页 -->
+  <section class="view" id="view-draw" data-od-id="view-draw">
+    <div class="draw">
+      <p class="eyebrow">贰 · 抽牌</p>
+      <h2 class="draw__title" id="draw-title">命运在掌间流转</h2>
+      <p class="draw__hint" id="draw-hint"></p>
+      <div class="draw__stage" id="draw-stage"></div>
+      <button type="button" class="btn btn--ghost" id="auto-pick" data-od-id="auto-pick">自动选牌</button>
+    </div>
+  </section>
+
+  <!-- 叁 · 解读页 -->
+  <section class="view" id="view-reading" data-od-id="view-reading" aria-live="polite">
+    <div class="reading">
+      <p class="eyebrow" id="reading-eyebrow">叁 · 解读</p>
+      <p class="reading__question" id="reading-question"></p>
+      <h2 class="reading__title" id="reading-title"></h2>
+      <div class="reading__cards" id="reading-cards"></div>
+      <article class="reading__block" id="reading-block"></article>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   22 张大阿卡纳 · 中文名 + 罗马数字编号
+   ════════════════════════════════════════════════════════════════ */
+var CARDS = [
+  { num:'0',    name:'愚人',   en:'The Fool',           symbol:'spiral',        key:'启程', revKey:'踌躇', up:'你正站在一段新旅途的开端。空白并不可怕，空白是尚未命名的自由。带上天真，也带上警觉。', rev:'你害怕重蹈覆辙，因而迟迟不肯迈步。留意那份反复的自我怀疑——它不是路的尽头，只是路还没被看见。' },
+  { num:'I',    name:'魔术师', en:'The Magician',       symbol:'infinity',      key:'显化', revKey:'虚耗', up:'你手中已握有所需的全部工具。别让它们沉睡，行动即是第一句咒语。', rev:'能力仍在，方向却在原地打转。检查你是把力量用在了做事，还是用在了犹豫。' },
+  { num:'II',   name:'女祭司', en:'The High Priestess', symbol:'crescent',      key:'静默', revKey:'迷惘', up:'答案不在喧嚣之中，而在你闭眼时才能听见的寂静里。信任直觉，它会比逻辑先一步抵达。', rev:'你听见了内心的声音，却不愿承认它。过度分析正在把直觉的微光浇熄。' },
+  { num:'III',  name:'皇后',   en:'The Empress',        symbol:'sun',           key:'丰盛', revKey:'匮乏', up:'生长是一件不必催促的事。此刻适合滋养自己、亲近自然，让丰盛从温柔里长出来。', rev:'你在消耗自己，却以为那是付出。先把自己照顾好，给予才有余裕。' },
+  { num:'IV',   name:'皇帝',   en:'The Emperor',        symbol:'diamond',       key:'秩序', revKey:'强撑', up:'你需要一副清晰的框架。稳定不是僵化，是把边界立好，让力量有所依凭。', rev:'固执的盔甲正在变重。掌控感若来自恐惧，就松开一点，让结构为你服务而非囚禁你。' },
+  { num:'V',    name:'教皇',   en:'The Hierophant',     symbol:'triangle',      key:'传承', revKey:'规条', up:'向经验与师者学习的时候到了。传统之中藏着你需要的钥匙，不必事事从头探索。', rev:'规则正在束缚而非保护你。区分哪些是别人的声音，哪些是你真正的选择。' },
+  { num:'VI',   name:'恋人',   en:'The Lovers',         symbol:'rings',         key:'合一', revKey:'割裂', up:'这是一次关乎心意的选择。诚实地面对欲望与价值，让爱成为判断的尺度。', rev:'你左右为难，因为两条路都有一部分是你。先与自己和解，答案自会浮现。' },
+  { num:'VII',  name:'战车',   en:'The Chariot',        symbol:'chevron',       key:'决意', revKey:'失向', up:'方向已定，剩下的只是坚定。驾驭内心的两匹烈马，让意志成为缰绳。', rev:'你用力过猛，反而失了准头。先停下来确认方向，再继续奔驰。' },
+  { num:'VIII', name:'力量',   en:'Strength',           symbol:'bolt',          key:'温柔', revKey:'内耗', up:'真正的力量是驯服而非压制。以柔克刚，耐心会让坚硬的事物柔软下来。', rev:'你在与自己角力。停止评判，接纳那一部分失控的自己，力量才会回来。' },
+  { num:'IX',   name:'隐者',   en:'The Hermit',         symbol:'lantern',       key:'内省', revKey:'孤僻', up:'暂时的独处是必要的。提灯进入自己的深处，答案正在静默中等待被你认出。', rev:'独处变成了躲避。若沉默已不再滋养你，就举起灯，走向一个人群中的光。' },
+  { num:'X',    name:'命运之轮', en:'Wheel of Fortune', symbol:'wheel',         key:'转机', revKey:'滞阻', up:'运势正在转动，你无需推它。顺势而为，抓住转瞬即逝的窗口。', rev:'轮子暂时停驻，这不是终点而是蓄力。别与周期对抗，让变化自己完成。' },
+  { num:'XI',   name:'正义',   en:'Justice',            symbol:'scales',        key:'因果', revKey:'失衡', up:'天平正在校准。诚实面对自己的责任，平衡会以你意想不到的方式回来。', rev:'你回避了某份应得的结果。把账算清，不是为了惩罚，而是为了清明。' },
+  { num:'XII',  name:'倒吊人', en:'The Hanged Man',     symbol:'triangle-down', key:'换位', revKey:'僵滞', up:'停下不是输。换一个视角看整盘棋，牺牲的此刻会变成洞察的起点。', rev:'你在等待一个迟迟不来的启示。若悬置太久，问问自己是在洞察，还是在拖延。' },
+  { num:'XIII', name:'死神',   en:'Death',              symbol:'hourglass',     key:'终结', revKey:'抗拒', up:'一段旧章正在落幕，这不是结束而是转化的开始。松开手，新的事物才有位置。', rev:'你紧抓着已死去的部分不放。承认告别，比继续假装鲜活更需要勇气。' },
+  { num:'XIV',  name:'节制',   en:'Temperance',         symbol:'cup',           key:'调和', revKey:'过犹', up:'极端的两端在此相融。放慢速度，找到属于自己的黄金比例。', rev:'平衡被打破了。留意过度的部分——无论是对外索取，还是对内苛责。' },
+  { num:'XV',   name:'恶魔',   en:'The Devil',          symbol:'pentagon',      key:'觉察', revKey:'挣脱', up:'束缚多半是你默许的。看见欲望背后的渴望，锁链便已开始松动。', rev:'你正在挣脱旧的引力，这很好。但小心从一个牢笼逃进另一个自制的牢笼。' },
+  { num:'XVI',  name:'高塔',   en:'The Tower',          symbol:'tower',         key:'崩解', revKey:'余震', up:'突如其来的震荡摇落了虚假的支柱。疼，但却是必要的清理。地基之下的，才是真实的你。', rev:'崩塌的余波尚未平息。不要急着重建，先让尘埃落定，看看哪些残骸本就不该保留。' },
+  { num:'XVII', name:'星星',   en:'The Star',           symbol:'star5',         key:'希望', revKey:'灰心', up:'长夜将尽，星光已现。你值得被治愈，也正在被治愈。保持相信。', rev:'你暂时看不见光，但它仍在那里。别用一时的暗淡否定整片星空。' },
+  { num:'XVIII', name:'月亮',  en:'The Moon',           symbol:'moon',          key:'幻影', revKey:'澄清', up:'此刻你正行经迷雾。不要用恐惧去解读未知，让直觉掌灯，缓慢前行。', rev:'迷雾正在散去。你曾担心的幻影逐渐现出轮廓，原来它比想象中温和。' },
+  { num:'XIX',  name:'太阳',   en:'The Sun',            symbol:'sunburst',      key:'明朗', revKey:'迟晴', up:'阴影尽退，生命在阳光下舒展。此刻的喜悦是真实的，不必怀疑，尽情照耀。', rev:'晴朗将至未至。别在黎明前最暗的一刻失去耐心，光已经在路上。' },
+  { num:'XX',   name:'审判',   en:'Judgement',          symbol:'crown',         key:'唤醒', revKey:'犹疑', up:'你听见了来自深处的召唤。是时候回应它——清算过往，为新的自己起身。', rev:'召唤仍在，你却用借口盖住了它。问问自己：还有什么让你不敢醒来？' },
+  { num:'XXI',  name:'世界',   en:'The World',          symbol:'globe',         key:'圆满', revKey:'未尽', up:'一个循环正在完成。你已抵达此段的终点，转身迎接与世界的重逢。', rev:'圆满差最后一步。别在门前转身，还差的那一小段，恰恰是最重要的。' }
+];
+
+var SYMBOLS = {
+  spiral: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 13a7 7 0 1 1 7 7 5 5 0 1 1 5-5 3 3 0 1 1-3 3"/></svg>',
+  infinity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16.5 8.5a4.5 4.5 0 0 0-9 0c0 3.5 9 2.5 9 6a4.5 4.5 0 0 1-9 0"/></svg>',
+  crescent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4a8 8 0 1 0 4 15 6 6 0 0 1-4-15z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="1.3"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.9 1.9M16.8 16.8l1.9 1.9M18.7 5.3l-1.9 1.9M7.2 16.8l-1.9 1.9"/></svg>',
+  sunburst: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.4"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/><circle cx="12" cy="12" r="1.2"/></svg>',
+  diamond: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.5 19 12l-7 8.5L5 12z"/></svg>',
+  triangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 4.5 20 19H4z"/></svg>',
+  'triangle-down': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 19.5 4 5h16z"/></svg>',
+  rings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="12" r="4.6"/><circle cx="15.5" cy="12" r="4.6"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 15l8-7 8 7"/><path d="M4 9l8-7 8 7"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 2.5 5 13h5l-1.5 8.5L17 11h-5z"/></svg>',
+  lantern: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="8" y="4" width="8" height="5.5" rx="1.2"/><path d="M7.5 9.5h9l-1.4 9.5H8.9z"/><path d="M12 9.5v9.5"/></svg>',
+  wheel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2"/><path d="M12 3.5v6.5M12 14v6.5M3.5 12H10M14 12h6.5M6 6l4.2 4.2M13.8 13.8 18 18M18 6l-4.2 4.2M10.2 13.8 6 18"/></svg>',
+  scales: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5h14M12 5v2.5"/><path d="M7.5 8 4.5 14h6zM16.5 8l3 6h-6z"/><path d="M12 14v4.5M8.5 18.5h7"/></svg>',
+  hourglass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h12v1.6c0 3.6-6 5.4-6 6.4 0 1 6 2.8 6 6.4V20H6v-1.6c0-3.6 6-5.4 6-6.4 0-1-6-2.8-6-6.4z"/></svg>',
+  cup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 3.5h6v6.5a3 3 0 0 1-6 0z"/><path d="M9 5.5H7.2a1.8 1.8 0 0 0 0 3.6H9M15 5.5h1.8a1.8 1.8 0 0 1 0 3.6H15"/><path d="M8 14h8M9 17h6M10.5 20h3"/></svg>',
+  pentagon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.2l7.2 3.7-2.4 7.6L12 20.8 7.2 14.5 4.8 6.9z"/></svg>',
+  tower: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 4h6v6.5l2.2 9.5H6.8L9 10.5z"/><path d="M13 12l-2 3.6h2l-1.5 3.4"/></svg>',
+  star5: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2.5 5.4 5.6.7-4.1 4 1 5.7L12 15.9l-5 3 1-5.7-4.1-4 5.6-.7z"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.2"/><path d="M15.5 5.2a6.4 6.4 0 1 0 3.4 11.8 5.1 5.1 0 0 1-3.4-11.8z"/></svg>',
+  crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5.5 7l2.8 2.8L12 5l3.7 4.8L18.5 7v9.5h-13z"/><path d="M5.5 18.5h13"/></svg>',
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="12" rx="8.5" ry="8.5"/><path d="M3.5 12h17M12 3.5c-2.8 3-2.8 14 0 17 2.8-3 2.8-14 0-17z"/></svg>'
+};
+
+var POSITIONS = {
+  single: [
+    { key:'今日指引', label:'今日指引', line:'这张牌是此刻最贴近你心事的答案。' }
+  ],
+  three: [
+    { key:'过去', label:'过去 · 回响', line:'旧日的余音仍在塑造当下，留意已成却未了的脉络。' },
+    { key:'现在', label:'现在 · 潮汐', line:'这是此刻能量的落点，你的选择正与它共振。' },
+    { key:'未来', label:'未来 · 微光', line:'照见趋势而非定数，前方仍留有你书写的余地。' }
+  ]
+};
+
+/* ═══════════════ 星空背景：星星 + 光尘 + 流星 ═══════════════ */
+(function () {
+  var canvas = document.getElementById('stars');
+  var ctx = canvas.getContext('2d');
+  var W = 0, H = 0, DPR = 1, stars = [], shooter = null, shootT = 2600, last = performance.now();
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var n = Math.round(Math.min(300, W * H / 7000));
+    stars = [];
+    for (var i = 0; i < n; i++) {
+      stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.3 + 0.3, a: Math.random() * 0.55 + 0.22, p: Math.random() * Math.PI * 2, s: Math.random() * 0.9 + 0.25 });
+    }
+  }
+
+  function draw(t) {
+    var dt = Math.min(t - last, 50); last = t;
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < stars.length; i++) {
+      var st = stars[i];
+      var tw = 0.55 + 0.45 * Math.sin(t * 0.001 * st.s + st.p);
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(244,238,248,' + (st.a * tw).toFixed(3) + ')';
+      ctx.fill();
+    }
+    if (!shooter) {
+      shootT -= dt;
+      if (shootT <= 0) {
+        shooter = { x: Math.random() * W * 0.6 + W * 0.2, y: Math.random() * H * 0.3, sp: 9 + Math.random() * 5, life: 0, max: 950 };
+        shootT = 5200 + Math.random() * 6200;
+      }
+    } else {
+      shooter.life += dt;
+      var k = shooter.life / shooter.max;
+      if (k >= 1) { shooter = null; }
+      else {
+        var cx = shooter.x - shooter.sp * k * 0.7, cy = shooter.y + shooter.sp * k;
+        var fade = 1 - k;
+        ctx.strokeStyle = 'rgba(232,201,122,' + (0.85 * fade).toFixed(3) + ')';
+        ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx - shooter.sp * 0.7, cy + shooter.sp);
+        ctx.stroke();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+/* 光尘粒子 */
+(function () {
+  var wrap = document.getElementById('dust');
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < 16; i++) {
+    var el = document.createElement('i');
+    var size = (Math.random() * 4 + 2).toFixed(1);
+    el.style.left = (Math.random() * 100).toFixed(1) + '%';
+    el.style.setProperty('--d', size + 'px');
+    el.style.setProperty('--t', (12 + Math.random() * 12).toFixed(1) + 's');
+    el.style.setProperty('--dl', (Math.random() * 14).toFixed(1) + 's');
+    el.style.setProperty('--x', (Math.random() * 60 - 30).toFixed(0) + 'px');
+    el.style.setProperty('--o', (0.25 + Math.random() * 0.4).toFixed(2));
+    frag.appendChild(el);
+  }
+  wrap.appendChild(frag);
+})();
+
+/* ═══════════════ 占卜引擎 ═══════════════ */
+var spreadCount = 1, question = '', deck = [], picks = [], pickIndex = 0, busy = false;
+var askView = document.getElementById('view-ask');
+var drawView = document.getElementById('view-draw');
+var readingView = document.getElementById('view-reading');
+var drawStage = document.getElementById('draw-stage');
+var drawTitle = document.getElementById('draw-title');
+var drawHint = document.getElementById('draw-hint');
+var autoBtn = document.getElementById('auto-pick');
+var restartBtn = document.getElementById('restart-btn');
+var qInput = document.getElementById('question');
+var startBtn = document.getElementById('start-btn');
+var askForm = document.getElementById('ask-form');
+
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+function posList() { return spreadCount === 1 ? POSITIONS.single : POSITIONS.three; }
+
+function setStep(s) {
+  var lis = document.querySelectorAll('.steps li');
+  for (var i = 0; i < lis.length; i++) lis[i].classList.toggle('is-active', lis[i].dataset.step === s);
+  restartBtn.classList.toggle('is-visible', s !== 'ask');
+}
+function showView(name) {
+  askView.classList.toggle('is-active', name === 'ask');
+  drawView.classList.toggle('is-active', name === 'draw');
+  readingView.classList.toggle('is-active', name === 'reading');
+}
+
+/* 牌背纹章（纯 SVG 绘制） */
+function cardBack() {
+  var lattice = '';
+  for (var r = 0; r < 5; r++) {
+    for (var c = 0; c < 3; c++) {
+      lattice += '<circle cx="' + (36 + c * 64) + '" cy="' + (74 + r * 24) + '" r="0.9"/>';
+    }
+  }
+  return '<span class="card-back">' +
+    '<svg class="back-emo" viewBox="0 0 200 340" fill="none" aria-hidden="true">' +
+    '<rect x="8" y="8" width="184" height="324" rx="14" stroke="var(--color-gold)" stroke-opacity="0.55" stroke-width="1.2"/>' +
+    '<rect x="16" y="16" width="168" height="308" rx="9" stroke="var(--color-gold)" stroke-opacity="0.22" stroke-width="1"/>' +
+    '<g stroke="var(--color-gold)" stroke-opacity="0.34"><path d="M100 112l9 9-9 9-9-9z"/><circle cx="100" cy="121" r="26"/><circle cx="100" cy="121" r="17"/></g>' +
+    '<path d="M103 106a11 11 0 1 0 5.5 15.5 9 9 0 0 1-5.5-15.5z" stroke="var(--color-gold)" stroke-opacity="0.4"/>' +
+    '<path d="M100 111l1.6 3.2 3.4.5-2.5 2.4.6 3.4-3.1-1.7-3.1 1.7.6-3.4-2.5-2.4 3.4-.5z" stroke="var(--color-gold)" stroke-opacity="0.5"/>' +
+    '<g stroke="var(--color-gold)" stroke-opacity="0.16">' + lattice + '</g>' +
+    '<g stroke="var(--color-gold)" stroke-opacity="0.18"><circle cx="100" cy="58" r="2.4"/><circle cx="100" cy="182" r="2.4"/><circle cx="58" cy="121" r="2"/><circle cx="142" cy="121" r="2"/></g>' +
+    '<g stroke="var(--color-gold)" stroke-opacity="0.3"><path d="M30 30h16M30 30v16"/><path d="M170 30h-16M170 30v16"/><path d="M30 310h16M30 310v-16"/><path d="M170 310h-16M170 310v-16"/></g>' +
+    '</svg>' +
+    '</span>';
+}
+
+/* 牌面 */
+function cardFront(card, reversed) {
+  return '<span class="card__inner' + (reversed ? ' is-reversed' : '') + '">' +
+    '<span class="card__frame">' +
+      '<span class="card__head">' +
+        '<span class="card__symbol">' + SYMBOLS[card.symbol] + '</span>' +
+        '<span class="card__star" aria-hidden="true">✦</span>' +
+      '</span>' +
+      '<span class="card__numeral">' + card.num + '</span>' +
+      '<span class="card__divider"><i></i></span>' +
+      '<span class="card__name">' + card.name + '</span>' +
+      '<span class="card__en">' + card.en + '</span>' +
+      '<span class="card__rev-mark" aria-hidden="true"></span>' +
+    '</span>' +
+  '</span>';
+}
+
+/* 提问页绑定 */
+document.querySelectorAll('.spread-opt').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.spread-opt').forEach(function (b) { b.classList.remove('is-selected'); });
+    btn.classList.add('is-selected');
+    spreadCount = parseInt(btn.dataset.spread, 10);
+  });
+});
+var fieldError = document.getElementById('field-error');
+function showFieldError(on) {
+  fieldError.classList.toggle('is-visible', on);
+  qInput.classList.toggle('is-error', on);
+}
+function startFlow() {
+  var q = qInput.value.trim();
+  if (q.length < 2) { showFieldError(true); return; }
+  showFieldError(false);
+  question = q;
+  beginFlow();
+}
+startBtn.addEventListener('click', startFlow);
+qInput.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') { e.preventDefault(); startFlow(); }
+});
+qInput.addEventListener('input', function () {
+  if (fieldError.classList.contains('is-visible')) showFieldError(false);
+});
+
+/* 抽牌流程 */
+function beginFlow() {
+  deck = shuffle(CARDS.slice());
+  picks = []; pickIndex = 0;
+  setStep('draw'); showView('draw');
+  runShuffle();
+}
+
+function runShuffle() {
+  var cards = '';
+  for (var i = 0; i < 6; i++) {
+    cards += '<div class="shuffle__card" style="--i:' + i + '"><div class="shuffle__jitter">' + cardBack() + '</div></div>';
+  }
+  drawStage.innerHTML = '<div class="shuffle" data-od-id="shuffle">' + cards + '<p class="shuffle__label">命运在掌间流转 · 洗牌中</p></div>';
+  drawTitle.textContent = '命运在掌间流转';
+  drawHint.classList.remove('is-visible');
+  autoBtn.style.visibility = 'hidden';
+  setTimeout(buildSpread, 2000);
+}
+
+function buildSpread() {
+  var pos = posList();
+  var slotCls = spreadCount === 1 ? 'slot--single' : '';
+  var html = '<div class="table" aria-hidden="true"></div>';
+  html += '<div class="spread' + (spreadCount === 3 ? ' spread--three' : '') + '" data-od-id="spread" data-count="' + spreadCount + '">';
+  for (var i = 0; i < pos.length; i++) {
+    var f = spreadCount === 1 ? '' : (i === 1 ? ' slot--c' : (i === 0 ? ' slot--l' : ' slot--r'));
+    html += '<div class="slot ' + slotCls + f + '" data-i="' + i + '" data-od-id="spread-slot-' + i + '">' +
+      '<span class="slot__deal">' +
+        '<span class="halo" aria-hidden="true"></span>' +
+        '<button type="button" class="card" data-i="' + i + '" aria-label="选择第 ' + (i + 1) + ' 张牌：' + pos[i].label + '">' +
+          '<span class="card__face card__face--back">' + cardBack() + '</span>' +
+          '<span class="card__face card__face--front"></span>' +
+        '</button>' +
+      '</span>' +
+      '<span class="slot__label">' + pos[i].label + '</span>' +
+    '</div>';
+  }
+  html += '</div>';
+  drawStage.innerHTML = html;
+  drawTitle.textContent = spreadCount === 1 ? '凝神，抽取你的指引' : '依序选择三张牌';
+  autoBtn.style.visibility = 'visible';
+  autoBtn.style.opacity = '1';
+
+  var slots = drawStage.querySelectorAll('.slot');
+  for (var s = 0; s < slots.length; s++) {
+    slots[s].style.animation = 'fadeIn 0.7s var(--ease-out) backwards';
+    slots[s].style.animationDelay = (0.12 + s * 0.14) + 's';
+    var deal = slots[s].querySelector('.slot__deal');
+    deal.style.animation = 'riseIn 0.8s var(--ease-out) backwards';
+    deal.style.animationDelay = (0.16 + s * 0.14) + 's';
+    slots[s].querySelector('.card').addEventListener('click', function (ev) {
+      reveal(parseInt(ev.currentTarget.dataset.i, 10));
+    });
+  }
+  updateHint();
+}
+
+function updateHint() {
+  var pos = posList();
+  var slots = drawStage.querySelectorAll('.slot');
+  for (var i = 0; i < slots.length; i++) {
+    var idx = parseInt(slots[i].dataset.i, 10);
+    slots[i].classList.toggle('is-next', idx === pickIndex);
+    slots[i].classList.toggle('is-done', idx < pickIndex);
+  }
+  if (pickIndex >= pos.length) {
+    drawHint.textContent = '牌已就位 · 正在为你解读';
+    drawHint.classList.add('is-visible');
+    return;
+  }
+  drawHint.textContent = '请选择第 ' + (pickIndex + 1) + ' 张牌 · ' + pos[pickIndex].key;
+  drawHint.classList.add('is-visible');
+}
+
+function reveal(i) {
+  if (busy) return;
+  var pos = posList();
+  if (i !== pickIndex) return;
+  var slot = drawStage.querySelector('.slot[data-i="' + i + '"]');
+  var cardEl = slot.querySelector('.card');
+  var card = deck.pop();
+  var reversed = Math.random() < 0.5;
+  slot.querySelector('.card__face--front').innerHTML = cardFront(card, reversed);
+  busy = true;
+  cardEl.classList.add('is-flipped');
+  if (reversed) cardEl.classList.add('is-reversed');
+  slot.classList.add('is-revealed');
+  picks.push({ card: card, reversed: reversed, pos: pos[i] });
+  pickIndex++;
+  setTimeout(function () { busy = false; updateHint(); }, 860);
+  if (pickIndex >= pos.length) {
+    setTimeout(function () {
+      autoBtn.style.visibility = 'hidden';
+      setTimeout(showReading, 260);
+    }, 1400);
+  }
+}
+
+autoBtn.addEventListener('click', function () {
+  var pos = posList();
+  if (busy || pickIndex >= pos.length) return;
+  reveal(pickIndex);
+  var tick = function () {
+    if (pickIndex >= pos.length) return;
+    if (busy) { setTimeout(tick, 320); return; }
+    reveal(pickIndex);
+    setTimeout(tick, 520);
+  };
+  setTimeout(tick, 900);
+});
+
+/* 解读合成 */
+function buildReading(picks, spread, question) {
+  var titles = { 1: '今日的星言', 3: '因果的回响' };
+  var orient = function (p) { return p.reversed ? '逆位' : '正位'; };
+  var text = function (p) { return p.reversed ? p.card.rev : p.card.up; };
+  var kw = function (p) { return p.reversed ? p.card.revKey : p.card.key; };
+  var points = [], summary = '';
+
+  if (spread === 1) {
+    var c = picks[0];
+    points.push('你问「' + question + '」，而「' + c.card.name + '」落在今日的中央。' + text(c));
+    points.push(c.reversed
+      ? '逆位并非凶兆，只是能量暂时转向——它提醒你放慢脚步，审视被忽略的那一面，把惯性换成选择。'
+      : '正位意味着能量顺畅——它邀请你承接这份暗示，让直觉走在犹豫前面。');
+    points.push('让这启示在今日的行动里慢慢显影，不必急着抵达结论。');
+    summary = '从「' + c.card.name + '」的回声来看，这段旅程的关键词是「' + kw(c) + '」。牌面给出的并非一个终局，而是一种态度：' +
+      (c.reversed ? '当能量受阻，正是重新校准方向的时候。' : '当能量顺行，正是让行动跟上直觉的时候。') +
+      '在接下来的日子里，让这份领悟成为你行事的底色，答案会在平静的行动中自行显形。';
+  } else {
+    var p = picks[0], n = picks[1], f = picks[2];
+    points.push('过去 · ' + p.card.name + orient(p) + '：' + text(p));
+    points.push('现在 · ' + n.card.name + orient(n) + '：' + text(n));
+    points.push('未来 · ' + f.card.name + orient(f) + '：' + text(f));
+    points.push('从「' + kw(p) + '」到「' + kw(n) + '」，再到「' + kw(f) + '」——这条脉络不是宿命，而是你内心真实走向的投影。');
+    summary = '三张牌连成一条线：' + p.card.name + '回望来路，' + n.card.name + '立足当下，' + f.card.name + '指向远方。' +
+      '「' + question + '」的答案不在牌里，而在你读完这段文字后，那一个平静的念头里。你始终握有改变的笔。';
+  }
+  return { title: titles[spread], points: points, summary: summary };
+}
+
+function showReading() {
+  var spreadLabel = spreadCount === 1 ? '单张指引' : '三张牌阵';
+  document.getElementById('reading-eyebrow').textContent = '叁 · 解读 · ' + spreadLabel;
+  document.getElementById('reading-question').textContent = '所问：「' + question + '」';
+  var r = buildReading(picks, spreadCount, question);
+  document.getElementById('reading-title').textContent = r.title;
+
+  var cardsHtml = '';
+  for (var i = 0; i < picks.length; i++) {
+    var p = picks[i];
+    var pc = '<figure class="reading-card" data-od-id="reading-card-' + i + '">' +
+      '<div class="reading-card__deal" style="animation-delay:' + (0.08 + i * 0.16) + 's">' +
+        '<div class="card is-flipped' + (p.reversed ? ' is-reversed' : '') + '">' +
+          '<span class="card__face card__face--back">' + cardBack() + '</span>' +
+          '<span class="card__face card__face--front">' + cardFront(p.card, p.reversed) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<figcaption style="animation-delay:' + (0.22 + i * 0.16) + 's">' +
+        '<span class="reading-card__pos">' + p.pos.label + '</span>' +
+        '<span class="chip ' + (p.reversed ? 'chip--rev' : 'chip--up') + '">' + (p.reversed ? '▼ 逆位' : '▲ 正位') + '</span>' +
+        '<span class="reading-card__key">' + (p.reversed ? p.card.revKey : p.card.key) + '</span>' +
+        '<p class="reading-card__text">' + (p.reversed ? p.card.rev : p.card.up) + '</p>' +
+      '</figcaption>' +
+    '</figure>';
+    cardsHtml += pc;
+  }
+  document.getElementById('reading-cards').innerHTML = cardsHtml;
+
+  var pts = '';
+  for (var k = 0; k < r.points.length; k++) {
+    pts += '<li style="animation-delay:' + (0.35 + k * 0.2) + 's">' + r.points[k] + '</li>';
+  }
+  document.getElementById('reading-block').innerHTML =
+    '<h3 class="reading__block-title">综合解读</h3>' +
+    '<ul class="reading__points">' + pts + '</ul>' +
+    '<p class="reading__summary" style="animation-delay:' + (0.35 + r.points.length * 0.2) + 's">' + r.summary + '</p>' +
+    '<p class="reading__sig" style="animation-delay:' + (0.5 + r.points.length * 0.2) + 's">— 灵性顾问 · 星语</p>';
+
+  setStep('reading'); showView('reading');
+}
+
+/* 重新占卜 */
+restartBtn.addEventListener('click', function () {
+  picks = []; pickIndex = 0; busy = false;
+  drawStage.innerHTML = '';
+  document.getElementById('reading-cards').innerHTML = '';
+  document.getElementById('reading-block').innerHTML = '';
+  drawHint.classList.remove('is-visible');
+  setStep('ask'); showView('ask');
+  qInput.focus();
+});
+</script>
+</body>
+</html>

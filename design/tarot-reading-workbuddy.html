@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夜观星象 · 塔罗占卜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@200;300;400;500&family=Noto+Sans+SC:wght@200;300;400;500&family=Noto+Serif+SC:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   设计系统 Design Tokens — 主题「神秘塔罗 / 午夜天文台」
+   ============================================================ */
+:root {
+  /* ———— 色板 Color ———— */
+  --color-bg-deep:   #0d0820;                    /* 最深夜空 */
+  --color-bg-night:  #1a1033;                    /* 深夜蓝紫 */
+  --color-bg-violet: #231a4d;                    /* 主紫 */
+  --color-bg-veil:   rgba(20, 12, 44, 0.72);     /* 玻璃遮罩 */
+  --color-gold:      #d4af37;                    /* 月光金 */
+  --color-gold-light:#e8c97a;                    /* 高光金 */
+  --color-gold-dim:  rgba(212, 175, 55, 0.32);   /* 弱金(辉光) */
+  --color-star:      #f4eef8;                    /* 星芒白 */
+  --color-ink:       #ece4f5;                    /* 正文 */
+  --color-ink-dim:   rgba(236, 228, 245, 0.62);
+  --color-ink-faint: rgba(236, 228, 245, 0.38);
+  --color-rust:      #8a3b3b;                    /* 逆位 暗锈红 */
+  --color-rust-light:#c26a5f;
+  --color-line:      rgba(212, 175, 55, 0.22);   /* 金线 */
+  --color-line-strong: rgba(212, 175, 55, 0.52);
+
+  /* ———— 字体 Font ———— */
+  --font-display: 'Playfair Display', 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+  --font-display-alt: 'Cormorant Garamond', 'Noto Serif SC', serif;
+  --font-body: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* ———— 间距 Space ———— */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  /* ———— 圆角 Radius ———— */
+  --radius-s: 8px; --radius-m: 14px; --radius-l: 22px; --radius-xl: 32px; --radius-full: 999px;
+
+  /* ———— 阴影 Shadow ———— */
+  --shadow-card: 0 18px 40px -12px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.42);
+  --shadow-card-hover: 0 26px 60px -12px rgba(0,0,0,0.72), 0 0 26px var(--color-gold-dim);
+  --shadow-glow: 0 0 32px rgba(232, 201, 122, 0.32);
+  --shadow-btn: 0 10px 30px -8px rgba(212, 175, 55, 0.45);
+  --shadow-panel: 0 24px 80px -20px rgba(0,0,0,0.7);
+
+  /* ———— 动效 Duration ———— */
+  --dur-fast: 0.3s;
+  --dur-base: 0.6s;
+  --dur-slow: 0.9s;
+  --dur-slower: 1.2s;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   基础 Reset
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  color: var(--color-ink);
+  background: var(--color-bg-deep);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; }
+::selection { background: rgba(212,175,55,0.35); color: #fff; }
+
+/* ============================================================
+   背景层 —— 深空渐变 · 星点 · 星轨 · 星座 · 光尘
+   ============================================================ */
+.bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+
+/* 2~3 层渐变 */
+.bg-grad {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #2b1e5e 0%, rgba(43,30,94,0) 55%),
+    radial-gradient(ellipse 90% 70% at 82% 88%, rgba(122, 74, 164, 0.22) 0%, rgba(122,74,164,0) 60%),
+    linear-gradient(180deg, var(--color-bg-violet) 0%, var(--color-bg-night) 46%, var(--color-bg-deep) 100%);
+}
+
+/* 星点纹理 (JS 生成) */
+.bg-stars { position: absolute; inset: 0; }
+.star {
+  position: absolute; border-radius: 50%;
+  background: var(--color-star);
+  animation: twinkle 5s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.85); }
+  50%      { opacity: 0.95; transform: scale(1.15); }
+}
+
+/* 星轨圆环 */
+.bg-orbit { position: absolute; inset: 0; display: grid; place-items: center; }
+.bg-orbit::before,
+.bg-orbit::after,
+.orbit-ring {
+  position: absolute; border-radius: 50%; border: 1px dashed rgba(212,175,55,0.12);
+}
+.bg-orbit::before { width: 86vmin; height: 86vmin; animation: spin 160s linear infinite; }
+.bg-orbit::after  { width: 64vmin; height: 64vmin; border-color: rgba(212,175,55,0.08);
+  animation: spin 110s linear infinite reverse; }
+.orbit-ring      { width: 42vmin; height: 42vmin; border-color: rgba(244,238,248,0.06);
+  animation: spin 80s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 星座连线 */
+.bg-constellation { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.5; }
+
+/* 光尘粒子 (canvas) */
+#dustCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* ============================================================
+   通用组件 —— 视图 / 眉题 / 按钮 / 输入 / 选项卡
+   ============================================================ */
+.app { position: relative; z-index: 1; height: 100%; }
+
+.view {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  opacity: 0; visibility: hidden;
+  transform: translateY(18px);
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out),
+              visibility 0s var(--dur-base);
+  padding: var(--space-6) var(--space-5);
+}
+.view.active {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out), visibility 0s;
+}
+.view-scroll { justify-content: flex-start; overflow-y: auto; }
+
+.eyebrow {
+  font-family: var(--font-body); font-size: 11px; font-weight: 400;
+  letter-spacing: 0.42em; text-indent: 0.42em;
+  text-transform: uppercase; color: var(--color-gold);
+  opacity: 0.85; margin-bottom: var(--space-4);
+}
+.eyebrow::before, .eyebrow::after {
+  content: '◆'; font-size: 7px; vertical-align: 2px;
+  margin: 0 var(--space-3); opacity: 0.7;
+}
+
+.title-display {
+  font-family: var(--font-display);
+  font-weight: 500; font-size: clamp(40px, 7vw, 68px);
+  letter-spacing: 0.12em; line-height: 1.15;
+  color: var(--color-star);
+  text-shadow: 0 0 46px rgba(232,201,122,0.28), 0 2px 18px rgba(0,0,0,0.6);
+  margin-bottom: var(--space-4);
+}
+.title-sub {
+  font-weight: 200; font-size: 15px; letter-spacing: 0.16em;
+  color: var(--color-ink-dim); max-width: 520px;
+  line-height: 1.9; margin-bottom: var(--space-8);
+}
+
+/* 新月装饰 */
+.moon-deco { margin-bottom: var(--space-6); animation: moon-drift 7s ease-in-out infinite; }
+@keyframes moon-drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+/* 按钮 */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  border: none; cursor: pointer; user-select: none;
+  font-weight: 400; letter-spacing: 0.22em; text-indent: 0.22em;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast), color var(--dur-fast),
+              border-color var(--dur-fast), opacity var(--dur-base);
+}
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-primary {
+  padding: 15px 52px; border-radius: var(--radius-full);
+  font-size: 14px; color: #221a4a;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+  box-shadow: var(--shadow-btn);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 44px -8px rgba(212,175,55,0.62);
+}
+.btn-ghost {
+  padding: 12px 34px; border-radius: var(--radius-full);
+  font-size: 12px; color: var(--color-ink-dim);
+  background: rgba(35,26,77,0.35);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(6px);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--color-gold-light); border-color: var(--color-line-strong); box-shadow: var(--shadow-glow); }
+
+/* 输入框 */
+.question-form { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
+.input {
+  width: min(540px, 88vw);
+  padding: 16px 30px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-line);
+  background: rgba(35,26,77,0.32);
+  backdrop-filter: blur(8px);
+  color: var(--color-ink);
+  font-family: var(--font-body); font-weight: 300;
+  font-size: 15px; letter-spacing: 0.06em; text-align: center;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.input::placeholder { color: var(--color-ink-faint); letter-spacing: 0.1em; }
+.input:focus {
+  outline: none; border-color: var(--color-line-strong);
+  box-shadow: 0 0 0 4px rgba(212,175,55,0.10), var(--shadow-glow);
+}
+.input.shake { animation: shake-x 0.45s var(--ease-soft); border-color: var(--color-rust-light); }
+@keyframes shake-x {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); } 40% { transform: translateX(9px); }
+  60% { transform: translateX(-6px); } 80% { transform: translateX(4px); }
+}
+
+/* 牌阵选择 */
+.spread-section { margin-top: var(--space-8); }
+.spread-label {
+  font-size: 12px; letter-spacing: 0.3em; text-indent: 0.3em;
+  color: var(--color-ink-faint); margin-bottom: var(--space-4);
+}
+.spread-options { display: flex; gap: var(--space-4); flex-wrap: wrap; justify-content: center; }
+.spread-option {
+  width: 230px; padding: var(--space-5) var(--space-4);
+  background: rgba(35,26,77,0.28);
+  border: 1px solid var(--color-line); border-radius: var(--radius-l);
+  cursor: pointer; text-align: center; color: var(--color-ink-dim);
+  backdrop-filter: blur(6px);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.spread-option:hover { border-color: var(--color-line-strong); transform: translateY(-2px); }
+.spread-option.active {
+  border-color: var(--color-line-strong);
+  background: rgba(35,26,77,0.55);
+  box-shadow: var(--shadow-glow);
+}
+.spread-option .opt-name {
+  display: block; font-family: var(--font-display); font-weight: 500;
+  font-size: 21px; letter-spacing: 0.08em; color: var(--color-ink);
+  margin-bottom: var(--space-2);
+}
+.spread-option.active .opt-name { color: var(--color-gold-light); }
+.spread-option .opt-desc { font-size: 12px; letter-spacing: 0.14em; }
+
+/* 角落「重新占卜」入口 */
+.corner-btn {
+  position: fixed; top: 22px; right: 26px; z-index: 80;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: var(--radius-full);
+  background: rgba(20,12,44,0.45);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink-faint);
+  font-size: 12px; letter-spacing: 0.18em; text-indent: 0.18em;
+  cursor: pointer; backdrop-filter: blur(8px);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.corner-btn:hover { color: var(--color-gold-light); border-color: var(--color-line-strong); box-shadow: var(--shadow-glow); }
+.corner-btn svg { opacity: 0.7; }
+
+/* ============================================================
+   卡牌组件 .card —— 3D 翻转 · 金线描边 · 纹章牌背
+   ============================================================ */
+.card {
+  position: absolute;
+  width: 150px; height: 250px;
+  perspective: 1200px;
+  cursor: pointer;
+  transition: transform var(--dur-base) var(--ease-out), filter var(--dur-base);
+}
+.card-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.card.flipped .card-inner { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.card-face::after { /* 金线描边 */
+  content: ''; position: absolute; inset: 6px;
+  border-radius: 9px;
+  border: 1px solid rgba(212,175,55,0.5);
+  pointer-events: none;
+}
+.card-face::before { /* 外描边 */
+  content: ''; position: absolute; inset: 0;
+  border-radius: var(--radius-m);
+  border: 1px solid rgba(212,175,55,0.85);
+  pointer-events: none;
+  box-shadow: inset 0 0 22px rgba(0,0,0,0.4);
+}
+
+/* 牌背 — 纹章式花纹 (纯 SVG) */
+.card-back {
+  background:
+    radial-gradient(ellipse at 50% 30%, #2a1f58 0%, var(--color-bg-night) 70%),
+    var(--color-bg-night);
+  display: grid; place-items: center;
+}
+.card-back svg { width: 100%; height: 100%; }
+
+/* 牌面 — 正面 */
+.card-front {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(232,201,122,0.10), transparent 55%),
+    linear-gradient(180deg, #241b4e 0%, #191033 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 26px 12px 20px;
+}
+.card-front.reversed { transform: rotateY(180deg) rotate(180deg); }
+
+.face-numeral {
+  font-family: var(--font-display-alt); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.22em; color: var(--color-gold); opacity: 0.9;
+}
+.face-emblem { display: grid; place-items: center; margin: 2px 0; }
+.face-name {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 27px; letter-spacing: 0.1em; color: var(--color-star);
+  text-shadow: 0 0 18px rgba(232,201,122,0.35);
+  writing-mode: vertical-rl; text-orientation: upright;
+  letter-spacing: 0.18em;
+}
+.face-en {
+  font-family: var(--font-display-alt); font-style: italic;
+  font-size: 11px; letter-spacing: 0.14em; color: var(--color-ink-faint);
+  text-transform: uppercase;
+}
+.face-foot {
+  width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-line-strong), transparent);
+  margin-bottom: 2px;
+}
+
+/* 交互态 */
+.card.hoverable:hover { transform: translateY(-12px) scale(1.03); filter: brightness(1.12); }
+.card .glow-ring {
+  position: absolute; inset: -3px; border-radius: 16px;
+  box-shadow: 0 0 0 0 rgba(232,201,122,0);
+  pointer-events: none; z-index: 5;
+}
+.card.picked { cursor: default; }
+.card.picked .glow-ring { animation: glow-pulse 1.6s var(--ease-soft) both; }
+@keyframes glow-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(232,201,122,0.55); }
+  100% { box-shadow: 0 0 0 26px rgba(232,201,122,0); }
+}
+
+/* 揭示信息条 */
+.reveal-tag {
+  position: absolute; left: 50%; bottom: -44px;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: max-content; opacity: 0; transition: opacity var(--dur-base) var(--ease-out) 0.3s;
+  pointer-events: none;
+}
+.card.picked .reveal-tag { opacity: 1; }
+.reveal-tag .rt-position {
+  font-size: 10px; letter-spacing: 0.34em; text-indent: 0.34em;
+  color: var(--color-ink-faint);
+}
+.reveal-tag .rt-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; letter-spacing: 0.24em; text-indent: 0.24em;
+  color: var(--color-gold-light);
+}
+.reveal-tag .rt-state.reversed-state { color: var(--color-rust-light); }
+
+/* ============================================================
+   提问页 (Intro)
+   ============================================================ */
+.view-intro .question-form { margin-top: var(--space-2); }
+
+/* ============================================================
+   抽牌页 (Draw)
+   ============================================================ */
+.view-draw { justify-content: flex-start; padding-top: var(--space-7); }
+.draw-hint {
+  font-size: 13px; font-weight: 200; letter-spacing: 0.22em;
+  color: var(--color-ink-dim); margin-top: var(--space-2);
+}
+.draw-progress {
+  margin-top: var(--space-4);
+  font-size: 12px; letter-spacing: 0.3em; text-indent: 0.3em;
+  color: var(--color-gold);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity var(--dur-base), transform var(--dur-base);
+}
+.draw-progress.show { opacity: 1; transform: none; }
+
+/* 桌面 */
+.table {
+  position: relative;
+  width: min(760px, 94vw);
+  height: 430px;
+  margin-top: var(--space-6);
+  border-radius: 50% / 46%;
+  background: radial-gradient(ellipse at 50% 46%, rgba(43,30,94,0.55) 0%, rgba(16,9,36,0.25) 62%, rgba(13,8,32,0) 78%);
+  box-shadow: inset 0 0 90px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,0,0,0.3);
+}
+.table::after {
+  content: ''; position: absolute; inset: 8% 18%;
+  border-radius: 50%;
+  border: 1px solid rgba(212,175,55,0.07);
+}
+
+/* 扇形牌位 */
+.spread { position: absolute; inset: 0; }
+.spread-card { left: 50%; top: 47%; margin-left: -75px; margin-top: -125px; }
+.spread-card .card-inner { transition: transform var(--dur-slow) var(--ease-out); }
+
+/* 洗牌抖动(叠于中心) */
+.spread.shuffling .spread-card { opacity: 1; animation: shake 1.5s var(--ease-soft) both; }
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  12%  { transform: translateX(-30px); }
+  26%  { transform: translateX(26px); }
+  40%  { transform: translateX(-20px); }
+  54%  { transform: translateX(16px); }
+  68%  { transform: translateX(-10px); }
+  82%  { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+
+/* 落位扇形 */
+.spread-card { opacity: 0; transform: translateY(30px); }
+.spread.dealt .spread-card {
+  opacity: 1; transform: none;
+  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-slow) var(--ease-out);
+}
+.spread.dealt .spread-card:nth-child(1) { transform: rotate(-15deg) translateX(-128px) translateY(6px); transition-delay: 0.05s; }
+.spread.dealt .spread-card:nth-child(2) { transform: rotate(0deg); transition-delay: 0.18s; }
+.spread.dealt .spread-card:nth-child(3) { transform: rotate(15deg) translateX(128px) translateY(6px); transition-delay: 0.31s; }
+.spread.dealt .spread-card.single { transform: rotate(0deg); transition-delay: 0.2s; }
+.spread.dealt .spread-card:nth-child(1).hoverable:hover { transform: rotate(-15deg) translateX(-128px) translateY(-6px) scale(1.04); }
+.spread.dealt .spread-card:nth-child(2).hoverable:hover { transform: translateY(-6px) scale(1.04); }
+.spread.dealt .spread-card:nth-child(3).hoverable:hover { transform: rotate(15deg) translateX(128px) translateY(-6px) scale(1.04); }
+
+/* 抽牌页操作区 */
+.draw-actions {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-4);
+  margin-top: var(--space-7); min-height: 96px;
+}
+#nextBtn { opacity: 0; transform: translateY(10px); pointer-events: none; }
+#nextBtn.show { opacity: 1; transform: none; pointer-events: auto; transition: all var(--dur-base) var(--ease-out); }
+
+/* ============================================================
+   解读页 (Reading)
+   ============================================================ */
+.view-reading { padding-top: var(--space-8); }
+.reading-question {
+  margin-top: var(--space-3); max-width: 560px;
+  font-weight: 200; font-size: 14px; letter-spacing: 0.1em;
+  color: var(--color-ink-faint); line-height: 1.8;
+}
+.reading-question::before { content: '「'; }
+.reading-question::after { content: '」'; }
+
+/* 解读牌卡区 */
+.reading-cards {
+  display: flex; justify-content: center; gap: var(--space-6);
+  margin-top: var(--space-7); flex-wrap: wrap;
+}
+.reading-card { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); width: 168px; }
+.mini-card {
+  position: relative; width: 148px; height: 246px;
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  animation: card-rise 1s var(--ease-out) both;
+}
+.mini-card:nth-child(1) { animation-delay: 0.15s; }
+.reading-card:nth-child(2) .mini-card { animation-delay: 0.3s; }
+.reading-card:nth-child(3) .mini-card { animation-delay: 0.45s; }
+@keyframes card-rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+.reading-card .rc-pos {
+  font-size: 10px; letter-spacing: 0.34em; text-indent: 0.34em;
+  color: var(--color-gold); text-transform: uppercase;
+}
+.reading-card .rc-name {
+  font-family: var(--font-display); font-size: 21px; font-weight: 500;
+  letter-spacing: 0.1em; color: var(--color-star);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.reading-card .rc-state {
+  font-size: 11px; letter-spacing: 0.26em; text-indent: 0.26em;
+  color: var(--color-ink-dim);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.reading-card .rc-state .triangle-down {
+  width: 0; height: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 7px solid var(--color-rust);
+  display: inline-block;
+}
+.reading-card .rc-state.reversed { color: var(--color-rust-light); }
+.reading-card .rc-state.upright .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-gold); display: inline-block; }
+
+/* 综合解读面板 */
+.reading-block {
+  width: min(680px, 92vw);
+  margin-top: var(--space-8);
+  padding: var(--space-7) var(--space-7) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-veil);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-panel);
+  position: relative; text-align: left;
+}
+.reading-block::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 72px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-light), transparent);
+}
+.rb-eyebrow { text-align: center; }
+.rb-title {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(22px, 3.4vw, 30px);
+  letter-spacing: 0.06em; line-height: 1.55;
+  color: var(--color-gold-light);
+  text-align: center; margin-top: var(--space-4);
+  text-shadow: 0 0 24px rgba(232,201,122,0.25);
+}
+.rb-divider {
+  width: 100%; margin: var(--space-5) 0;
+  border: none; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-line), transparent);
+}
+.rb-points { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); }
+.rb-points li {
+  display: flex; gap: var(--space-3); align-items: baseline;
+  font-size: 14.5px; font-weight: 300; letter-spacing: 0.04em;
+  line-height: 1.8; color: var(--color-ink);
+}
+.rb-points li::before {
+  content: '✦'; color: var(--color-gold); font-size: 11px;
+  transform: translateY(-1px); flex-shrink: 0;
+}
+.rb-points .pt-label {
+  font-size: 11px; letter-spacing: 0.22em; color: var(--color-gold);
+  white-space: nowrap; flex-shrink: 0;
+}
+.rb-summary {
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: var(--radius-l);
+  background: rgba(212,175,55,0.06);
+  border: 1px solid rgba(212,175,55,0.16);
+  font-size: 14.5px; font-weight: 200; letter-spacing: 0.05em;
+  line-height: 2; color: var(--color-ink-dim);
+  text-align: center;
+}
+.rb-summary b { color: var(--color-gold-light); font-weight: 500; }
+
+/* 逐段淡入 */
+.reveal-item { opacity: 0; transform: translateY(14px); transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out); }
+.reveal-item.visible { opacity: 1; transform: none; }
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media (max-width: 640px) {
+  .spread.dealt .spread-card:nth-child(1) { transform: rotate(-15deg) translateX(-96px); }
+  .spread.dealt .spread-card:nth-child(3) { transform: rotate(15deg) translateX(96px); }
+  .table { height: 380px; }
+  .card { width: 128px; height: 214px; }
+  .spread-card { margin-left: -64px; margin-top: -107px; }
+  .reading-block { padding: var(--space-6) var(--space-5); }
+  .corner-btn { top: 14px; right: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 背景层 ============ -->
+<div class="bg" aria-hidden="true">
+  <div class="bg-grad"></div>
+  <div class="bg-stars"></div>
+  <div class="bg-orbit"><div class="orbit-ring"></div></div>
+  <svg class="bg-constellation" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 星座连线与星 -->
+    <g stroke="rgba(232,201,122,0.30)" stroke-width="0.8">
+      <line x1="180" y1="150" x2="320" y2="90"/>
+      <line x1="320" y1="90"  x2="420" y2="210"/>
+      <line x1="420" y1="210" x2="300" y2="300"/>
+      <line x1="300" y1="300" x2="180" y2="150"/>
+      <line x1="1120" y1="180" x2="1260" y2="130"/>
+      <line x1="1260" y1="130" x2="1330" y2="260"/>
+      <line x1="1330" y1="260" x2="1180" y2="330"/>
+      <line x1="1180" y1="330" x2="1120" y2="180"/>
+      <line x1="860" y1="640" x2="980" y2="560"/>
+      <line x1="980" y1="560" x2="1060" y2="680"/>
+      <line x1="1060" y1="680" x2="900" y2="760"/>
+      <line x1="900" y1="760" x2="860" y2="640"/>
+    </g>
+    <g fill="#e8c97a">
+      <circle cx="180" cy="150" r="2.4"/><circle cx="320" cy="90" r="1.8"/><circle cx="420" cy="210" r="2"/>
+      <circle cx="300" cy="300" r="1.6"/><circle cx="1120" cy="180" r="2.2"/><circle cx="1260" cy="130" r="1.6"/>
+      <circle cx="1330" cy="260" r="2"/><circle cx="1180" cy="330" r="1.7"/><circle cx="860" cy="640" r="2.2"/>
+      <circle cx="980" cy="560" r="1.6"/><circle cx="1060" cy="680" r="1.9"/><circle cx="900" cy="760" r="1.5"/>
+    </g>
+    <!-- 新月 -->
+    <path d="M1180 480 A 56 56 0 1 0 1180 592 A 46 46 0 1 1 1180 480 Z" fill="rgba(232,201,122,0.85)"/>
+    <circle cx="1180" cy="536" r="64" stroke="rgba(232,201,122,0.14)" stroke-width="1"/>
+  </svg>
+  <canvas id="dustCanvas"></canvas>
+</div>
+
+<div class="app">
+
+  <!-- 角落 · 重新占卜 -->
+  <button class="corner-btn" id="restartBtn" title="重新占卜">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    重新占卜
+  </button>
+
+  <!-- ============ 提问页 ============ -->
+  <section class="view view-intro active" id="viewIntro">
+    <svg class="moon-deco" width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M70 14 A 44 44 0 1 0 70 86 A 35 35 0 1 1 70 14 Z" fill="#e8c97a" opacity="0.92"/>
+      <circle cx="70" cy="50" r="46" stroke="rgba(212,175,55,0.25)" stroke-width="1" stroke-dasharray="2 5"/>
+    </svg>
+    <p class="eyebrow">Midnight Observatory</p>
+    <h1 class="title-display">夜观星象</h1>
+    <p class="title-sub">将你的问题交给星辰,静候牌面为你展开的线索<br>此刻,月光正为答案留白。</p>
+
+    <form class="question-form" id="questionForm">
+      <input class="input" id="questionInput" type="text" maxlength="60"
+             placeholder="请输入你心中的问题…" autocomplete="off">
+      <button class="btn btn-primary" type="submit">开始占卜</button>
+    </form>
+
+    <div class="spread-section">
+      <p class="spread-label">选 择 牌 阵</p>
+      <div class="spread-options" id="spreadOptions">
+        <button class="spread-option active" type="button" data-spread="single">
+          <span class="opt-name">单张牌</span>
+          <span class="opt-desc">今日指引 · 一牌了然</span>
+        </button>
+        <button class="spread-option" type="button" data-spread="three">
+          <span class="opt-name">三张牌阵</span>
+          <span class="opt-desc">过去 · 现在 · 未来</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 抽牌页 ============ -->
+  <section class="view view-draw" id="viewDraw">
+    <p class="eyebrow">Concentrate &amp; Choose</p>
+    <h2 class="title-display" style="font-size: clamp(28px, 4.4vw, 42px);">静心,选牌</h2>
+    <p class="draw-hint" id="drawHint">在牌背间凭直觉择取,不要犹豫</p>
+    <p class="draw-progress" id="drawProgress"></p>
+
+    <div class="table">
+      <div class="spread" id="spread"></div>
+    </div>
+
+    <div class="draw-actions">
+      <button class="btn btn-ghost" id="autoPickBtn">自动选牌</button>
+      <button class="btn btn-primary" id="nextBtn">查看解读</button>
+    </div>
+  </section>
+
+  <!-- ============ 解读页 ============ -->
+  <section class="view view-reading view-scroll" id="viewReading">
+    <p class="eyebrow">Your Reading</p>
+    <h2 class="title-display" style="font-size: clamp(28px, 4.4vw, 42px);">星语已至</h2>
+    <p class="reading-question" id="readingQuestion"></p>
+
+    <div class="reading-cards" id="readingCards"></div>
+    <div class="reading-block" id="readingBlock"></div>
+    <div style="height: 40px;"></div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   数据 —— 22 张大阿卡纳(中文名 + 罗马数字编号 + 正/逆位解读)
+   ============================================================ */
+const MAJOR_ARCANA = [
+  { num:'0',  name:'愚者',   en:'The Fool',
+    up:{ t:'新的旅程,正等待你的第一步', k:['纯真启程','未知的邀请','自由的勇气'],
+         a:'放下对结局的执着,像初次踏上旅途的旅人一样,相信下一步会接住你。' },
+    re:{ t:'犹豫,让脚步变得沉重', k:['鲁莽或迟疑','错失的岔路','害怕出发'],
+         a:'检查自己是否在逃避选择,或是因冲动而偏离了方向。慢下来,但不要停下。' } },
+  { num:'I',  name:'魔术师', en:'The Magician',
+    up:{ t:'你手中,已握有全部的牌', k:['资源齐备','意志聚焦','创造显化'],
+         a:'调动你已知的每一种能力,把想法落成行动。此刻,正是施展的时刻。' },
+    re:{ t:'能量被分散,才迟迟未见结果', k:['才华沉睡','自我怀疑','动机含混'],
+         a:'清理干扰,审视你的真实意图,把力气收回到最关键的那一件事上。' } },
+  { num:'II', name:'女祭司', en:'High Priestess',
+    up:{ t:'答案,藏在安静的水面之下', k:['直觉苏醒','内在智慧','静候启示'],
+         a:'不必追问结果,先倾听感受。有些答案需要月光而非日光,才能看见。' },
+    re:{ t:'被喧闹掩盖的低语', k:['忽视直觉','信息过载','自我隐瞒'],
+         a:'你或许正用忙碌回避内心的声音。留一段无人打扰的时间,只给自己。' } },
+  { num:'III',name:'皇后',   en:'The Empress',
+    up:{ t:'让一切自然生长,丰盛自会到来', k:['滋养与创造','感官丰盛','温柔的接纳'],
+         a:'以耐心浇灌手头的事,像照料花园一样,信任生命自身的节律。' },
+    re:{ t:'过度给予,反而掏空了自己', k:['照顾失衡','创造力阻塞','忽视自我'],
+         a:'先为自己留出养分。学会在被需要时说「不」,也是一种成熟。' } },
+  { num:'IV', name:'皇帝',   en:'The Emperor',
+    up:{ t:'秩序与担当,是此刻的锚', k:['结构稳固','责任落地','权威确立'],
+         a:'把决定建立在清晰的规则之上。你的稳定,会给周围带来安全感。' },
+    re:{ t:'控制过紧,反而折断了枝干', k:['固执僵化','过度掌控','权威动摇'],
+         a:'松开一点手,允许他人与变化参与进来。真正的力量,在于弹性。' } },
+  { num:'V',  name:'教皇',   en:'The Hierophant',
+    up:{ t:'在传统与指引中找到归属', k:['寻求导师','遵循正道','智慧传承'],
+         a:'向经验学习,信任已有的体系。你需要的答案,前人已留下痕迹。' },
+    re:{ t:'教条之下,长出的是枷锁', k:['打破常规','质疑权威','独立探索'],
+         a:'不必全盘接受现成的答案,倾听自己判断的声音,走出自己的路。' } },
+  { num:'VI', name:'恋人',   en:'The Lovers',
+    up:{ t:'选择,是心与心之间的桥梁', k:['深刻联结','价值共鸣','重要抉择'],
+         a:'无论是关系还是决定,让真心与价值观为你指路,而非一时冲动。' },
+    re:{ t:'失衡的天平,摇摆在两难之间', k:['关系张力','价值动摇','回避选择'],
+         a:'诚实面对分歧与不一致。回避,只会让裂痕在沉默中加深。' } },
+  { num:'VII',name:'战车',   en:'The Chariot',
+    up:{ t:'意志坚定,便能驶过所有阻碍', k:['目标明确','意志取胜','掌控方向'],
+         a:'锁定目标,用纪律驾驭情绪。你比你以为的,更能掌控局面。' },
+    re:{ t:'方向未定,战车便只是原地轰鸣', k:['失控冲动','方向迷失','内外拉扯'],
+         a:'先停火,问自己真正想要什么。方向对了,速度才有意义。' } },
+  { num:'VIII',name:'力量',  en:'Strength',
+    up:{ t:'温柔的驯服,胜过激烈的征服', k:['内在勇气','温柔坚定','驯服本能'],
+         a:'以柔克刚,用耐心与善意化解对立。真正的力量,从不喧哗。' },
+    re:{ t:'压抑的火焰,在暗处灼烧', k:['自我怀疑','情绪失控','内在消耗'],
+         a:'承认自己的脆弱与愤怒。它们需要被看见,而不是被镇压。' } },
+  { num:'IX', name:'隐者',   en:'The Hermit',
+    up:{ t:'独行,是为了更清楚地看见', k:['内省静修','智慧之光','自我探索'],
+         a:'暂时离开人群与喧嚣,答案会在独处的寂静中,缓缓浮现。' },
+    re:{ t:'孤独,变成了囚禁', k:['孤立无援','过度封闭','害怕连接'],
+         a:'独处与逃避只有一线之隔。是时候,提灯走向人群了。' } },
+  { num:'X',  name:'命运之轮', en:'Wheel of Fortune',
+    up:{ t:'命运的轮盘,正在转动', k:['时机成熟','转折将至','顺势而为'],
+         a:'接受变化是生命的一部分。此刻的转折,会带你到新的高度。' },
+    re:{ t:'逆流处,恰是调整的时机', k:['时运阻滞','抗拒变化','重复循环'],
+         a:'若感到停滞,先停止挣扎。看清循环的模式,才能跳出它。' } },
+  { num:'XI', name:'正义',   en:'Justice',
+    up:{ t:'诚实,是最稳固的支点', k:['公正裁决','因果分明','真相浮现'],
+         a:'用事实与平衡的态度处理眼前的事,对得起自己的心。' },
+    re:{ t:'失衡之处,必有未被正视的真相', k:['偏袒不公','逃避责任','自我欺骗'],
+         a:'检查是否有被回避的过错或偏见。修复它,从诚实开始。' } },
+  { num:'XII',name:'倒吊人', en:'The Hanged Man',
+    up:{ t:'换一个角度,困局自有出路', k:['主动暂停','视角转换','智慧牺牲'],
+         a:'此刻的停滞是一种礼物。放下挣扎,从不同的角度看同一件事。' },
+    re:{ t:'无谓的牺牲,拖住了前行的脚步', k:['徒劳等待','自我消耗','错付忠诚'],
+         a:'若等待不再有意义,就解开绳索。不是所有的坚持,都值得。' } },
+  { num:'XIII',name:'死神',  en:'Death',
+    up:{ t:'结束,是另一种开始', k:['彻底放下','自然终结','蜕变新生'],
+         a:'让该结束的结束。枯萎之处,正在为新的生长腾出空间。' },
+    re:{ t:'迟迟不肯放手的旧物,最是沉重', k:['抗拒改变','拖延告别','陈旧执着'],
+         a:'你紧握的东西,早已完成它的使命。放手,才能接住新的可能。' } },
+  { num:'XIV',name:'节制',   en:'Temperance',
+    up:{ t:'在中道之上,万物调和', k:['平衡融合','耐心调和','稳步前行'],
+         a:'不急不缓,把冲突的两端调成和谐的节奏。时间,会给出答案。' },
+    re:{ t:'失衡的倾斜,让一切失速', k:['过度或匮乏','急躁冒进','缺乏调和'],
+         a:'检查生活里失衡的部分——无论工作、情感,还是欲望。' } },
+  { num:'XV', name:'恶魔',   en:'The Devil',
+    up:{ t:'看见枷锁,是挣脱的第一步', k:['直面欲望','识破执念','自主觉醒'],
+         a:'承认困住你的是什么,把选择权,从诱惑手中拿回来。' },
+    re:{ t:'锁链,正在松动', k:['挣脱束缚','觉醒边缘','重获自由'],
+         a:'你已意识到,自己并非无处可逃。迈出一步,自由就在门外。' } },
+  { num:'XVI',name:'高塔',   en:'The Tower',
+    up:{ t:'崩塌,是为了重建', k:['突然剧变','幻象破灭','解放性重击'],
+         a:'旧结构被闪电击碎是痛苦的,但它清出了诚实的地基。' },
+    re:{ t:'危机尚可挽回,不必等它彻底倾覆', k:['延迟崩塌','侥幸回避','重建契机'],
+         a:'主动拆掉摇摇欲坠的部分,比被动等待崩塌,更有尊严。' } },
+  { num:'XVII',name:'星星',  en:'The Star',
+    up:{ t:'愿你记得,希望从未离开', k:['重燃希望','平静疗愈','灵感指引'],
+         a:'经历风暴之后,星光依然。把心,放回清澈的愿望上。' },
+    re:{ t:'希望蒙尘,星光仍在云后', k:['信心低落','灵感枯竭','自我怀疑'],
+         a:'允许自己休息与怀疑,但别忘记抬头。光,一直在那里。' } },
+  { num:'XVIII',name:'月亮', en:'The Moon',
+    up:{ t:'迷雾之中,唯有直觉可作灯', k:['梦境浮现','未知恐惧','直觉导航'],
+         a:'此刻看不清全貌是正常的。跟随直觉的微光,谨慎前行。' },
+    re:{ t:'迷雾散去,真相浮出水面', k:['困惑消散','幻觉破除','情绪清明'],
+         a:'被隐藏的事实将显现。直面它,胜过在猜测中消耗自己。' } },
+  { num:'XIX',name:'太阳',   en:'The Sun',
+    up:{ t:'光明坦途,万事可期', k:['成功喜悦','活力充沛','清晰明朗'],
+         a:'此刻的阳光属于你。敞开拥抱成果,也分享这份光。' },
+    re:{ t:'云层之后,光只是暂隐', k:['短暂低谷','热度消退','乐观受阻'],
+         a:'不过是天气变化。保持心里的温度,太阳自会再次升起。' } },
+  { num:'XX', name:'审判',   en:'Judgement',
+    up:{ t:'醒来,回应内心的召唤', k:['觉醒重生','宽恕和解','做出回应'],
+         a:'过去已结算,新的阶段在呼唤你。回应它,向前走。' },
+    re:{ t:'迟迟不响应的号角,终会变成噪音', k:['自我批判','逃避觉醒','悔恨纠缠'],
+         a:'停止审判自己。你被召唤,不是因为完美,而是因为准备好了。' } },
+  { num:'XXI',name:'世界',   en:'The World',
+    up:{ t:'圆满达成,旅程的冠冕', k:['完成与整合','圆满归宿','全新循环'],
+         a:'一个阶段完整落幕。庆祝它,然后带着经验,开始下一程。' },
+    re:{ t:'差一步的圆满,仍在路上', k:['未竟之事','过渡停滞','收尾拖延'],
+         a:'最后一程最需耐心。补上缺失的那块拼图,再出发。' } }
+];
+
+/* ============================================================
+   工具 —— 随机 / 视图切换 / 星象背景
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const shuffleArr = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+const state = {
+  spread: 'single',            // 'single' | 'three'
+  question: '',
+  deck: [],                    // 本次抽出的牌 [card, card, ...]
+  revealed: [],                // [{ card, reversed, position }]
+  busy: false
+};
+
+function showView(name) {
+  ['viewIntro', 'viewDraw', 'viewReading'].forEach(id => $(id).classList.remove('active'));
+  $(name).classList.add('active');
+}
+
+/* 星星生成 */
+function createStars() {
+  const layer = document.querySelector('.bg-stars');
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 160; i++) {
+    const s = document.createElement('span');
+    s.className = 'star';
+    const size = (Math.random() * 1.9 + 0.6).toFixed(1);
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = (Math.random() * 100).toFixed(2) + '%';
+    s.style.top = (Math.random() * 100).toFixed(2) + '%';
+    s.style.animationDelay = (Math.random() * 6).toFixed(1) + 's';
+    s.style.animationDuration = (4 + Math.random() * 6).toFixed(1) + 's';
+    frag.appendChild(s);
+  }
+  layer.appendChild(frag);
+}
+
+/* 光尘粒子 */
+function initDust() {
+  const canvas = $('dustCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, parts = [];
+  function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
+  resize(); addEventListener('resize', resize);
+  for (let i = 0; i < 72; i++) parts.push({
+    x: Math.random() * w, y: Math.random() * h,
+    r: Math.random() * 1.6 + 0.3,
+    vy: -(Math.random() * 0.22 + 0.06),
+    vx: (Math.random() - 0.5) * 0.08,
+    a: Math.random() * 0.45 + 0.12,
+    tw: Math.random() * Math.PI * 2
+  });
+  (function tick() {
+    ctx.clearRect(0, 0, w, h);
+    for (const p of parts) {
+      p.y += p.vy; p.x += p.vx; p.tw += 0.018;
+      if (p.y < -6) { p.y = h + 6; p.x = Math.random() * w; }
+      const alpha = p.a * (0.55 + 0.45 * Math.sin(p.tw));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(232,201,122,' + alpha.toFixed(3) + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  })();
+}
+
+/* ============================================================
+   牌面 / 牌背 组件
+   ============================================================ */
+const STAR_SVG = '<svg viewBox="0 0 12 12" width="9" height="9"><path d="M6 0l1.4 4.6L12 6l-4.6 1.4L6 12 4.6 7.4 0 6l4.6-1.4z" fill="#d4af37" opacity="0.9"/></svg>';
+
+function cardBackSVG() {
+  return `<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg">
+    <rect x="7" y="7" width="186" height="306" rx="14" fill="rgba(16,9,36,0.6)" stroke="#d4af37" stroke-width="1.4" opacity="0.85"/>
+    <rect x="15" y="15" width="170" height="290" rx="10" fill="none" stroke="#d4af37" stroke-width="0.8" opacity="0.4" stroke-dasharray="3 4"/>
+    <circle cx="100" cy="160" r="72" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.55"/>
+    <circle cx="100" cy="160" r="57" fill="none" stroke="#e8c97a" stroke-width="0.6" opacity="0.3" stroke-dasharray="1 4"/>
+    <path d="M100 104 L131 160 L100 216 L69 160 Z" fill="none" stroke="#e8c97a" stroke-width="1.1" opacity="0.75"/>
+    <path d="M112 136 A 28 28 0 1 0 112 184 A 21 21 0 1 1 112 136 Z" fill="#e8c97a" opacity="0.9"/>
+    <path d="M100 150 l3.2 8 8 3.2 -8 3.2 -3.2 8 -3.2 -8 -8 -3.2 8 -3.2 Z" fill="#d4af37"/>
+    <circle cx="100" cy="100" r="2" fill="#e8c97a" opacity="0.8"/>
+    <circle cx="100" cy="220" r="2" fill="#e8c97a" opacity="0.8"/>
+    <path d="M28 40 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill="#d4af37" opacity="0.7"/>
+    <path d="M172 40 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill="#d4af37" opacity="0.7"/>
+    <path d="M28 280 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill="#d4af37" opacity="0.7"/>
+    <path d="M172 280 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill="#d4af37" opacity="0.7"/>
+  </svg>`;
+}
+
+/* 牌面内容(正面),opts.reversed 时上下倒置 */
+function faceInnerHTML(card) {
+  return `
+    <div class="face-numeral">${card.num}</div>
+    <div class="face-emblem">
+      <svg viewBox="0 0 90 90" width="66" height="66" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="40" fill="none" stroke="rgba(212,175,55,0.5)" stroke-width="1"/>
+        <circle cx="45" cy="45" r="31" fill="none" stroke="rgba(232,201,122,0.3)" stroke-width="0.7" stroke-dasharray="2 4"/>
+        <path d="M45 16 L54 36 L74 36 L58 49 L64 69 L45 57 L26 69 L32 49 L16 36 L36 36 Z"
+              fill="rgba(232,201,122,0.92)"/>
+        <circle cx="45" cy="45" r="3.2" fill="#f4eef8"/>
+      </svg>
+    </div>
+    <div class="face-name">${card.name}</div>
+    <div class="face-en">${card.en}</div>
+    <div class="face-foot"></div>`;
+}
+
+/* 抽牌页卡牌 DOM —— 3D 结构,初始牌背朝上 */
+function buildSpreadCard(card) {
+  const el = document.createElement('div');
+  el.className = 'card spread-card hoverable';
+  el.innerHTML = `
+    <div class="glow-ring"></div>
+    <div class="card-inner">
+      <div class="card-face card-back">${cardBackSVG()}</div>
+      <div class="card-face card-front">${faceInnerHTML(card)}</div>
+    </div>
+    <div class="reveal-tag">
+      <span class="rt-position"></span>
+      <span class="rt-state"></span>
+    </div>`;
+  return el;
+}
+
+/* ============================================================
+   流程 1 —— 提问页
+   ============================================================ */
+$('spreadOptions').addEventListener('click', (e) => {
+  const btn = e.target.closest('.spread-option');
+  if (!btn) return;
+  document.querySelectorAll('.spread-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.spread = btn.dataset.spread;
+});
+
+$('questionForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = $('questionInput').value.trim();
+  if (!q) {
+    const input = $('questionInput');
+    input.classList.remove('shake');
+    void input.offsetWidth; // 重启动画
+    input.classList.add('shake');
+    input.placeholder = '请先写下你的问题…';
+    return;
+  }
+  state.question = q;
+  startDraw();
+});
+
+/* ============================================================
+   流程 2 —— 抽牌页
+   ============================================================ */
+const positions = { single: ['今日指引'], three: ['过去', '现在', '未来'] };
+
+function startDraw() {
+  showView('viewDraw');
+  // 从 22 张中随机抽取
+  const count = state.spread === 'single' ? 1 : 3;
+  state.deck = shuffleArr(MAJOR_ARCANA).slice(0, count);
+  state.revealed = [];
+
+  const spread = $('spread');
+  spread.innerHTML = '';
+  spread.className = 'spread shuffling';
+  state.deck.forEach(card => spread.appendChild(buildSpreadCard(card)));
+
+  $('drawHint').textContent = state.spread === 'single'
+    ? '在心中默念问题,点击牌背,翻开今日指引'
+    : '依次择取三张 —— 第一张为过去,第二张为现在,第三张为未来';
+  $('drawProgress').classList.remove('show');
+  $('nextBtn').classList.remove('show');
+  $('autoPickBtn').style.visibility = 'visible';
+  state.busy = true;
+
+  // 洗牌抖动 → 扇形落位
+  setTimeout(() => {
+    spread.classList.remove('shuffling');
+    spread.classList.add('dealt');
+    setTimeout(() => {
+      state.busy = false;
+      // 绑定选牌事件
+      spread.querySelectorAll('.spread-card').forEach((el, i) => {
+        el.addEventListener('click', () => pickCard(i, el));
+      });
+    }, 950);
+  }, 1650);
+}
+
+function pickCard(idx, el) {
+  if (state.busy || !el || el.classList.contains('picked')) return;
+  state.busy = true;
+
+  const card = state.deck[idx];
+  const reversed = Math.random() < 0.5;
+  const position = positions[state.spread][state.revealed.length];
+  state.revealed.push({ card, reversed, position });
+
+  // 揭晓
+  el.classList.remove('hoverable');
+  el.classList.add('picked');
+  setTimeout(() => el.classList.add('flipped'), 120);
+  if (reversed) el.querySelector('.card-front').classList.add('reversed');
+
+  // 揭示标签
+  const tag = el.querySelector('.reveal-tag');
+  tag.querySelector('.rt-position').textContent = position;
+  const st = tag.querySelector('.rt-state');
+  st.innerHTML = reversed
+    ? '<span class="triangle-down"></span>逆位'
+    : '<span class="dot"></span>正位';
+  if (reversed) st.classList.add('reversed-state');
+
+  // 进度提示
+  const total = state.revealed.length === positions[state.spread].length;
+  $('drawProgress').textContent = total
+    ? '牌面已全部揭示'
+    : `已择 ${state.revealed.length} / ${positions[state.spread].length} 张 · ${position}`;
+  $('drawProgress').classList.add('show');
+
+  setTimeout(() => {
+    if (state.revealed.length === positions[state.spread].length) {
+      $('autoPickBtn').style.visibility = 'hidden';
+      $('nextBtn').classList.add('show');
+    }
+    state.busy = false;
+  }, 1100);
+}
+
+/* 自动选牌 */
+$('autoPickBtn').addEventListener('click', () => {
+  if (state.busy) return;
+  const spreadEl = $('spread');
+  // 按 DOM 顺序(左→中→右)逐张自动选择
+  const order = Array.from(spreadEl.querySelectorAll('.spread-card'))
+    .map(el => ({ el, idx: [...spreadEl.children].indexOf(el) }))
+    .filter(o => !o.el.classList.contains('picked'));
+  order.forEach((o, i) => {
+    setTimeout(() => pickCard(o.idx, o.el), 950 + i * 1200);
+  });
+});
+
+/* 查看解读 */
+$('nextBtn').addEventListener('click', () => buildReading());
+
+/* ============================================================
+   流程 3 —— 解读页
+   ============================================================ */
+function buildReading() {
+  showView('viewReading');
+  $('readingQuestion').textContent = state.question;
+
+  // —— 上部:牌卡区 ——
+  const cardsEl = $('readingCards');
+  cardsEl.innerHTML = '';
+  state.revealed.forEach(({ card, reversed, position }, i) => {
+    const item = document.createElement('div');
+    item.className = 'reading-card reveal-item';
+    item.innerHTML = `
+      <div class="mini-card">
+        <div class="card-face card-back" style="position:absolute;inset:0;backface-visibility:visible;-webkit-backface-visibility:visible;">${cardBackSVG()}</div>
+        <div class="card-face card-front ${reversed ? 'reversed' : ''}" style="position:absolute;inset:0;backface-visibility:visible;-webkit-backface-visibility:visible;transform:${reversed ? 'rotate(180deg)' : 'rotateY(180deg)'};">${faceInnerHTML(card)}</div>
+      </div>
+      <span class="rc-pos">${position}</span>
+      <span class="rc-name">${card.name} <span style="font-family:var(--font-display-alt);font-size:13px;color:var(--color-gold);letter-spacing:0.1em;">${card.num}</span></span>
+      <span class="rc-state ${reversed ? 'reversed' : 'upright'}">
+        ${reversed ? '<span class="triangle-down"></span>逆位' : '<span class="dot"></span>正位'}
+      </span>`;
+    cardsEl.appendChild(item);
+  });
+
+  // —— 下部:综合解读 ——
+  const g = state.revealed.map(r => (r.reversed ? r.card.re : r.card.up));
+  let title, points, summary;
+
+  if (state.revealed.length === 1) {
+    title = g[0].t;
+    points = g[0].k.map(k => ({ label: null, text: k }));
+    summary = `<b>给你的建议 · </b>${g[0].a}`;
+  } else {
+    const [past, now, future] = state.revealed;
+    const pg = past.reversed ? past.card.re : past.card.up;
+    const ng = now.reversed ? now.card.re : now.card.up;
+    const fg = future.reversed ? future.card.re : future.card.up;
+    title = `${pg.t}；${ng.t}；${fg.t}`;
+    points = [
+      { label: '过去', text: `${past.card.name} · ${pg.k[0]}` },
+      { label: '现在', text: `${now.card.name} · ${ng.k[0]}` },
+      { label: '未来', text: `${future.card.name} · ${fg.k[0]}` },
+      { label: '提示', text: `${ng.k[1]} —— ${ng.k[2]}` }
+    ];
+    summary = `<b>向前看 · </b>${fg.a}`;
+  }
+
+  const block = $('readingBlock');
+  block.innerHTML = `
+    <p class="eyebrow rb-eyebrow">The Reading · 综合解读</p>
+    <h3 class="rb-title reveal-item">${title}</h3>
+    <hr class="rb-divider reveal-item">
+    <ul class="rb-points">
+      ${points.map((p, i) => `
+        <li class="reveal-item">
+          ${p.label ? `<span class="pt-label">${p.label}</span>` : ''}
+          <span>${p.text}</span>
+        </li>`).join('')}
+    </ul>
+    <p class="rb-summary reveal-item">${summary}</p>`;
+
+  // 逐段淡入
+  setTimeout(() => {
+    cardsEl.querySelectorAll('.reveal-item').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), 150 + i * 260);
+    });
+    block.querySelectorAll('.reveal-item').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), 650 + i * 300);
+    });
+    $('viewReading').scrollTo({ top: 0 });
+  }, 200);
+}
+
+/* ============================================================
+   重新占卜
+   ============================================================ */
+$('restartBtn').addEventListener('click', () => {
+  state.question = '';
+  state.deck = [];
+  state.revealed = [];
+  state.busy = false;
+  $('questionInput').value = '';
+  $('questionInput').placeholder = '请输入你心中的问题…';
+  $('spread').className = 'spread';
+  showView('viewIntro');
+});
+
+/* ============================================================
+   启动
+   ============================================================ */
+createStars();
+initDust();
+</script>
+</body>
+</html>
